@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8 # ?? ???
+      enabled: true # ??? ???
+      force: true  # ??/?? ?? UTF-8 ?? ?? (?? ?? ??)
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/delivery?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: developer
+    password: dev1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      # ddl-auto: update # ??? ??? ??, ??? ??
+      ddl-auto: validate # ???? DB???? ?? ??? ??
+    #    defer-datasource-initialization: true  # ? Hibernate? ??? ?? ? data.sql ??
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      use_sql_comments: true
+      dialect: org.hibernate.dialect.MySQLDialect
+#  sql:
+#    init:
+#      mode: always        # ? data.sql ?? ???
+#      encoding: UTF-8
+
+token:
+  secret:
+    key: SpringSecurityKey_P_ssword_http__Spring_io
+  access-token:
+    plus-hour: 1
+  refresh-token:
+    plus-hour: 12

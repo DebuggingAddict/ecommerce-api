@@ -2,9 +2,9 @@ server:
   port: 8080
   servlet:
     encoding:
-      charset: UTF-8 # ?? ???
-      enabled: true # ??? ???
-      force: true  # ??/?? ?? UTF-8 ?? ?? (?? ?? ??)
+      charset: UTF-8 # 한글 인코딩
+      enabled: true # 인코딩 활성화
+      force: true  # 요청/응답 모두 UTF-8 강제 적용 (한글 깨짐 방지)
 
 spring:
   datasource:
@@ -14,9 +14,9 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      # ddl-auto: update # ??? ??? ??, ??? ??
-      ddl-auto: validate # ???? DB???? ?? ??? ??
-    #    defer-datasource-initialization: true  # ? Hibernate? ??? ?? ? data.sql ??
+      # ddl-auto: update # 테이블 없으면 생성, 있으면 수정
+      ddl-auto: validate # 엔티티와 DB스키마의 일치 여부만 검증
+    #    defer-datasource-initialization: true  # ✅ Hibernate가 테이블 만든 후 data.sql 실행
     show-sql: true
     properties:
       hibernate.format_sql: true
@@ -24,7 +24,7 @@ spring:
       dialect: org.hibernate.dialect.MySQLDialect
 #  sql:
 #    init:
-#      mode: always        # ? data.sql ?? ???
+#      mode: always        # 🚀 data.sql 실행 활성화
 #      encoding: UTF-8
 
 token:

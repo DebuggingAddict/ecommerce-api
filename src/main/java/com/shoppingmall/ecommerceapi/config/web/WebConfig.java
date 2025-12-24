@@ -1,4 +1,4 @@
-package com.shoppingmall.ecommerceapi.common.config.web;
+package com.shoppingmall.ecommerceapi.config.web;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

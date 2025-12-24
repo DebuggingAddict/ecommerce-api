@@ -42,7 +42,8 @@ public class Product {
   private ProductCategory category;
 
   @Enumerated(EnumType.STRING)
-  private ProductStatus status = ProductStatus.SOLD_OUT;
+  @Column(nullable = false)
+  private ProductStatus status;
 
   @Column(nullable = false)
   private Integer stock = 0;
@@ -58,4 +59,17 @@ public class Product {
   private LocalDateTime updatedAt;
 
   private LocalDateTime deletedAt;
+
+  public void updateStock(Integer quantity) {
+    if (quantity == null) {
+      return;
+    }
+    this.stock += quantity;
+
+    if (this.stock > 0) {
+      this.status = ProductStatus.FOR_SALE;
+    } else {
+      this.status = ProductStatus.SOLD_OUT;
+    }
+  }
 }

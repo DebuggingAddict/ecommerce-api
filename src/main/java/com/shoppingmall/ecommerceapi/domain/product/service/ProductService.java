@@ -20,8 +20,7 @@ public class ProductService {
     String finalImgSrc = (request.getImgSrc() == null) ? "none.png" : request.getImgSrc();
 
     ProductStatus status =
-        (request.getStock() == null || request.getStock() <= 0) ? ProductStatus.SOLD_OUT
-            : ProductStatus.FOR_SALE;
+        (request.getStock() > 0) ? ProductStatus.FOR_SALE : ProductStatus.SOLD_OUT;
 
     Product product = productConverter.toEntity(request, finalImgSrc, status);
 

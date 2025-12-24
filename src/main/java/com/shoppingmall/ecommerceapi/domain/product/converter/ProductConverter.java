@@ -15,7 +15,7 @@ public class ProductConverter {
         .price(request.getPrice())
         .description(request.getDescription())
         .category(request.getCategory())
-        .stock(request.getStock() != null ? request.getStock() : 0)
+        .stock(request.getStock())
         .status(status)
         .imgSrc(finalImgSrc)
         .build();

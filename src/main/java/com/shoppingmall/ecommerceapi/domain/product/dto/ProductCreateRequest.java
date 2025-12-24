@@ -34,7 +34,7 @@ public class ProductCreateRequest {
   @NotNull(message = "재고 수량 입력은 필수입니다.")
   @Min(value = 0, message = "재고는 0개 이상이어야 합니다.")
   @Max(value = 10000, message = "재고는 최대 10000개 까지 등록 가능합니다.")
-  private Integer stock = 0;
+  private Integer stock;
 
   private String imgSrc;
 

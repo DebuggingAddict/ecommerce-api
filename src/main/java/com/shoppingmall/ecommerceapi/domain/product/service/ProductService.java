@@ -55,7 +55,7 @@ public class ProductService {
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> getProducts(ProductCategory category, PageRequestDTO req) {
     Pageable pageable = req.toPageable();
-    
+
     Page<Product> productPage;
     if (category != null) {
       productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);

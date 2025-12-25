@@ -1,6 +1,7 @@
 package com.shoppingmall.ecommerceapi.domain.product.service;
 
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
+import com.shoppingmall.ecommerceapi.common.response.PageRequestDTO;
 import com.shoppingmall.ecommerceapi.common.response.PageResponse;
 import com.shoppingmall.ecommerceapi.domain.product.converter.ProductConverter;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
@@ -13,7 +14,9 @@ import com.shoppingmall.ecommerceapi.domain.product.repository.ProductRepository
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,18 +55,37 @@ public class ProductService {
 
   // 상품 전체 조회
   @Transactional(readOnly = true)
-  public PageResponse<ProductResponse> getProducts(ProductCategory category, Pageable pageable) {
-    Page<Product> productPage = (category != null)
-        ? productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable)
-        : productRepository.findAllByDeleteAtIsNull(pageable);
+  public PageResponse<ProductResponse> getProducts(ProductCategory category, PageRequestDTO req) {
+    Sort sort = Sort.by("id").descending();
+
+    if (req.getSort() != null) {
+      sort = switch (req.getSort()) {
+        case "price_asc" -> Sort.by("price").ascending(); // 가격 낮은 순
+        case "price_desc" -> Sort.by("price").descending(); // 가격 높은 순
+        case "name" -> Sort.by("name").ascending(); // 이름순
+        default -> Sort.by("id").descending(); // 최신순(default)
+      };
+    }
+    Pageable pageable = PageRequest.of(
+        req.getPage(),
+        req.getSize(),
+        sort
+    );
+    Page<Product> productPage;
+    if (category != null) {
+      productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);
+    } else {
+      productPage = productRepository.findAllByDeleteAtIsNull(pageable);
+    }
 
     List<ProductResponse> content = productPage.getContent().stream()
         .map(productConverter::toResponse)
         .toList();
 
-    return PageResponse.of(productPage, content, pageable.getSort().toString());
+    return PageResponse.of(productPage, content, req.getSort());
   }
 
+  // 이미지 파일 유효성 검사
   private boolean isValidImageExtension(String fileName) {
     if ("none.png".equals(fileName)) {
       return true;
@@ -72,6 +94,7 @@ public class ProductService {
     return lowercase.endsWith(".jpg") || lowercase.endsWith(".png") || lowercase.endsWith(".jpeg");
   }
 
+  // 헬퍼 메서드
   @Transactional(readOnly = true)
   public Product findProductEntityById(Long id) {
     return productRepository.findById(id)

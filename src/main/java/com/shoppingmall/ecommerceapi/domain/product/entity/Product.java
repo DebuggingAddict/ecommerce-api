@@ -81,6 +81,13 @@ public class Product {
     this.imgSrc = imgSrc;
   }
 
+  // 상품 삭제
+  public void delete() {
+    this.isActive = false;
+    this.deletedAt = LocalDateTime.now();
+    this.status = ProductStatus.STOP_SALE;
+  }
+
   // 재고 관리
   public void updateStock(Integer quantity) {
     if (quantity == null) {

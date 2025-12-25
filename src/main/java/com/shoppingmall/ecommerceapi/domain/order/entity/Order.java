@@ -91,6 +91,10 @@ public class Order {
     orderItem.setOrder(this);
   }
 
+  public void updateTotalPrice(BigDecimal newTotalPrice) {
+    this.totalPrice = newTotalPrice;
+  }
+
   public void cancel() {
     if (this.orderStatus != OrderStatus.PENDING) {
       throw new IllegalStateException("ORDER_STATUS_CONFLICT");

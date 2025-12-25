@@ -21,7 +21,10 @@ public enum ProductErrorCode implements ApiCode {
   PRODUCT_UNAUTHENTICATED(HttpStatus.UNAUTHORIZED.value(), 401, "상품을 등록하려면 관리자 계정으로 로그인이 필요합니다."),
 
   // 403 Forbidden: 권한 부족
-  PRODUCT_FORBIDDEN(HttpStatus.FORBIDDEN.value(), 403, "상품 등록 권한이 없는 유저가 관리자 기능을 시도했습니다.");
+  PRODUCT_FORBIDDEN(HttpStatus.FORBIDDEN.value(), 403, "상품 등록 권한이 없는 유저가 관리자 기능을 시도했습니다."),
+
+  // 404 Not Found
+  PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), 404, "존재하지 않는 상품 아이디입니다.");
 
   private final Integer httpStatus;
   private final Integer code;

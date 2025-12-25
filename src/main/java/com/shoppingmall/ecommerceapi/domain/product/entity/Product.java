@@ -1,7 +1,9 @@
 package com.shoppingmall.ecommerceapi.domain.product.entity;
 
+import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductCategory;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
+import com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,7 +66,17 @@ public class Product {
     if (quantity == null) {
       return;
     }
-    this.stock += quantity;
+
+    int resultStock = this.stock + quantity;
+
+    if (resultStock < 0) {
+      throw new BusinessException(
+          ProductErrorCode.PRODUCT_INVALID_STOCK,
+          String.format("요청하신 수량만큼 차감할 수 없습니다.", this.stock, Math.abs(quantity))
+      );
+    }
+
+    this.stock = resultStock;
 
     if (this.stock > 0) {
       this.status = ProductStatus.FOR_SALE;

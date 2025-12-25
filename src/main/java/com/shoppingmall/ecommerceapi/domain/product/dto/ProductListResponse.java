@@ -1,5 +1,6 @@
 package com.shoppingmall.ecommerceapi.domain.product.dto;
 
+import com.shoppingmall.ecommerceapi.common.response.PageResponse.PageInfo;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,18 +16,4 @@ public class ProductListResponse {
   private List<ProductResponse> products;
   private PageInfo pageInfo;
 
-  @Getter
-  @Builder
-  public static class PageInfo {
-
-    private int currentPage;
-    private int pageSize;
-    private long totalElements;
-    private int totalPages;
-    private String currentSort;
-    private boolean isFirst;
-    private boolean isLast;
-    private boolean hasNext;
-    private boolean hasPrevious;
-  }
 }

@@ -26,10 +26,25 @@ public enum ProductErrorCode implements ApiCode {
   PRODUCT_UNAUTHENTICATED_VIEW(HttpStatus.UNAUTHORIZED.value(), 401,
       "비공개 상품이거나 회원 전용 상품인 경우 로그인이 필요합니다."),
   PRODUCT_FORBIDDEN_VIEW(HttpStatus.FORBIDDEN.value(), 403, "해당 상품 정보를 조회할 권한이 없습니다."),
-  PRODUCT_DUPLICATE_NAME(HttpStatus.CONFLICT.value(), 409, "이미 존재하는 상품 이름으로 등록 시도 (중복 방지)"),
   PRODUCT_STATUS_CONFLICT(HttpStatus.CONFLICT.value(), 409,
       "상품 상태가 요청을 수행할 수 없는 상태입니다 (이미 삭제됨 또는 재고 부족)"),
-  PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), 404, "존재하지 않는 상품 아이디입니다.");
+  PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), 404, "존재하지 않는 상품 아이디입니다."),
+
+  // 상품 수정
+  // (위의 INVALID 시리즈는 수정 시에도 공통 사용 가능)
+  PRODUCT_UPDATE_UNAUTHENTICATED(HttpStatus.UNAUTHORIZED.value(), 401,
+      "상품 수정을 하려면 관리자 계정으로 로그인이 필요합니다."),
+  PRODUCT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN.value(), 403, "해당 상품을 수정할 관리자 권한이 없습니다."),
+  PRODUCT_UPDATE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), 404,
+      "수정하려는 상품 ID가 존재하지 않거나 이미 삭제된 상품입니다."),
+
+  // 상품 삭제
+  PRODUCT_DELETE_UNAUTHENTICATED(HttpStatus.UNAUTHORIZED.value(), 401,
+      "상품을 삭제하려면 관리자 계정으로 로그인이 필요합니다."),
+  PRODUCT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN.value(), 403, "해당 상품을 삭제할 관리자 권한이 없습니다."),
+  PRODUCT_DELETE_NOT_FOUND(HttpStatus.NOT_FOUND.value(), 404,
+      "삭제하려는 상품 ID가 존재하지 않거나 이미 삭제 처리된 상품입니다."),
+  PRODUCT_DELETE_FAILED(HttpStatus.CONFLICT.value(), 409, "해당 상품으로 결제된 주문 내역이 존재하여 삭제할 수 없습니다.");
 
   private final Integer httpStatus;
   private final Integer code;

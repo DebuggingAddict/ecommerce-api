@@ -8,9 +8,9 @@ import com.shoppingmall.ecommerceapi.domain.product.entity.Product;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
 import com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode;
 import com.shoppingmall.ecommerceapi.domain.product.repository.ProductRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +33,12 @@ public class ProductService {
 
     Product savedProduct = productRepository.save(product);
     return productConverter.toResponse(savedProduct);
+  }
+
+  @Transactional(readOnly = true)
+  public Product findProductEntityById(Long id) {
+    return productRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_NOT_FOUND));
   }
 
   private boolean isValidImageExtension(String fileName) {

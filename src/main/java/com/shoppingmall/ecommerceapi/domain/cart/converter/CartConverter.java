@@ -35,6 +35,7 @@ public class CartConverter {
     return CartResponse.builder()
         .cartId(cart.getId())
         .userId(cart.getUserId())
+        .updatedAt(cart.getUpdatedAt())
         .items(items)
         .build();
   }

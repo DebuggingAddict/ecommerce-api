@@ -54,8 +54,21 @@ public class ProductService {
   // 상품 전체 조회
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> getProducts(ProductCategory category, PageRequestDTO req) {
-    Pageable pageable = req.toPageable();
-
+    // 페이지 번호, 사이즈
+    if (req.getPage() < 0) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_PAGE);
+    }
+    if (req.getSize() <= 0) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_PAGE_SIZE);
+    }
+    // 정렬 기준
+    Pageable pageable;
+    try {
+      pageable = req.toPageable();
+    } catch (Exception e) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_SORT);
+    }
+    // 캍[고리
     Page<Product> productPage;
     if (category != null) {
       productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);

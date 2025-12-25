@@ -49,7 +49,7 @@ public class ProductService {
   // 상품 수정
   @Transactional
   public ProductResponse updateProduct(Long id, ProductUpdateRequest request) {
-    // 기존 상품 조회
+    // 수정할 상품 조회
     Product product = productRepository.findById(id)
         .filter(p -> p.getDeletedAt() == null)
         .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_UPDATE_NOT_FOUND));
@@ -78,6 +78,18 @@ public class ProductService {
     );
 
     return productConverter.toResponse(product);
+  }
+
+  // 상품 삭제
+  @Transactional
+  public void deleteProduct(Long id) {
+    // 삭제할 상품 조회
+    Product product = productRepository.findById(id)
+        .filter(p -> p.getDeletedAt() == null)
+        .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_DELETE_NOT_FOUND));
+
+    // 더티체킹
+    product.delete();
   }
 
   // 상품 단건 조회

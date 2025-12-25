@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 @Table(name = "products")
@@ -56,8 +58,12 @@ public class Product {
 
   private Boolean isActive = true;
 
-  private LocalDateTime createdAt = LocalDateTime.now();
+  @CreatedDate
+  @Column(updatable = false, nullable = false)
+  private LocalDateTime createdAt;
 
+  @LastModifiedDate
+  @Column(nullable = false)
   private LocalDateTime updatedAt;
 
   private LocalDateTime deletedAt;

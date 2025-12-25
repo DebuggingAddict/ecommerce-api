@@ -68,6 +68,20 @@ public class Product {
 
   private LocalDateTime deletedAt;
 
+  // 상품 수정
+  public void update(String name, String description, Integer price,
+      ProductCategory category, ProductStatus status,
+      Integer stock, String imgSrc) {
+    this.name = name;
+    this.description = description;
+    this.price = price;
+    this.category = category;
+    this.status = status;
+    this.stock = stock;
+    this.imgSrc = imgSrc;
+  }
+
+  // 재고 관리
   public void updateStock(Integer quantity) {
     if (quantity == null) {
       return;

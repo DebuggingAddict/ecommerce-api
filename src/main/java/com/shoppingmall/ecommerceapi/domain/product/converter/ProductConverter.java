@@ -36,6 +36,7 @@ public class ProductConverter {
         .description(product.getDescription())
         .imgSrc(product.getImgSrc())
         .createdAt(product.getCreatedAt())
+        .updatedAt(product.getUpdatedAt())
         .build();
   }
 }

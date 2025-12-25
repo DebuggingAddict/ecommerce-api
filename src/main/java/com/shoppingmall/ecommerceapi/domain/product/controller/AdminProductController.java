@@ -7,6 +7,7 @@ import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -42,4 +43,12 @@ public class AdminProductController {
     return Api.OK(response);
   }
 
+  // 상품 삭제
+  @PatchMapping("/{id}")
+  public Api<Void> delete(
+      @PathVariable Long id) {
+    productService.deleteProduct(id);
+
+    return Api.OK(null);
+  }
 }

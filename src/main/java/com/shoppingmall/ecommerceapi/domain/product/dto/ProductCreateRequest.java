@@ -29,7 +29,7 @@ public class ProductCreateRequest {
   @NotNull(message = "카테고리 입력은 필수입니다.")
   private ProductCategory category;
 
-  private ProductStatus status = ProductStatus.SOLD_OUT;
+  private ProductStatus status = ProductStatus.FOR_SALE;
 
   @NotNull(message = "재고 수량 입력은 필수입니다.")
   @Min(value = 0, message = "재고는 0개 이상이어야 합니다.")

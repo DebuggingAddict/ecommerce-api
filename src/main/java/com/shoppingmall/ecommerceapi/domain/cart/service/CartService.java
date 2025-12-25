@@ -38,7 +38,7 @@ public class CartService {
   /**
    * 정책: 이미 담긴 상품이면 CART_ITEM_ALREADY_EXISTS
    */
-  public void addItem(Long userId, AddCartItemRequest request) {
+  public CartItem addItem(Long userId, AddCartItemRequest request) {
     Cart cart = getCartByUserId(userId);
 
     if (request.getQuantity() <= 0) {
@@ -68,23 +68,27 @@ public class CartService {
     // 4) 담기
     CartItem item = CartConverter.toEntity(request);
     cart.addItem(item);
+
+    return item;
   }
 
-  public void changeQuantity(Long userId, Long productId, int quantity) {
+  // 기존: changeQuantity(Long userId, Long productId, int quantity)
+  public CartItem changeQuantity(Long userId, Long cartItemId, int quantity) {
     Cart cart = getCartByUserId(userId);
 
     if (quantity <= 0) {
-
       throw new BusinessException(CartErrorCode.CART_ITEM_INVALID_QUANTITY);
     }
 
     CartItem item = cart.getItems().stream()
-        .filter(i -> i.getProductId().equals(productId))
+        .filter(i -> i.getId().equals(cartItemId))   // ID 기준으로 검색
         .findFirst()
         .orElseThrow(() -> new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND));
 
     item.changeQuantity(quantity);
+    return item;
   }
+
 
   public void removeItem(Long userId, Long productId) {
     Cart cart = getCartByUserId(userId);

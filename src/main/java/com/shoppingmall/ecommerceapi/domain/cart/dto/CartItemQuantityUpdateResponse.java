@@ -1,6 +1,6 @@
 package com.shoppingmall.ecommerceapi.domain.cart.dto;
 
-import jakarta.validation.constraints.Min;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChangeCartItemQuantityRequest {
+public class CartItemQuantityUpdateResponse {
 
-  @Min(1)
-  private int quantity;
+  private Long id;
+  private Long productId;
+  private Integer productQuantity;
+  private LocalDateTime updatedAt;
 }
 

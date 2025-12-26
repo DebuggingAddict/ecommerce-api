@@ -3,6 +3,8 @@ package com.shoppingmall.ecommerceapi.domain.cart.service;
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
 import com.shoppingmall.ecommerceapi.domain.cart.converter.CartConverter;
 import com.shoppingmall.ecommerceapi.domain.cart.dto.AddCartItemRequest;
+import com.shoppingmall.ecommerceapi.domain.cart.dto.CartItemResponse;
+import com.shoppingmall.ecommerceapi.domain.cart.dto.CartResponse;
 import com.shoppingmall.ecommerceapi.domain.cart.entity.Cart;
 import com.shoppingmall.ecommerceapi.domain.cart.entity.CartItem;
 import com.shoppingmall.ecommerceapi.domain.cart.exception.CartErrorCode;
@@ -10,6 +12,7 @@ import com.shoppingmall.ecommerceapi.domain.cart.repository.CartRepository;
 import com.shoppingmall.ecommerceapi.domain.product.entity.Product;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,27 @@ public class CartService {
   }
 
   /**
+   * 장바구니 조회 + Product 정보 조합 후 CartResponse 반환.
+   */
+  @Transactional(readOnly = true)
+  public CartResponse getCartResponse(Long userId) {
+    Cart cart = getCartByUserId(userId);
+
+    List<CartItemResponse> itemResponses = cart.getItems().stream()
+        .map(item -> {
+          Product product = productService.findProductEntityById(item.getProductId());
+          return CartConverter.toCartItemResponse(
+              item,
+              product.getName(),
+              product.getPrice()
+          );
+        })
+        .toList();
+
+    return CartConverter.toCartResponse(cart, itemResponses);
+  }
+
+  /**
    * 정책: 이미 담긴 상품이면 CART_ITEM_ALREADY_EXISTS
    */
   public CartItem addItem(Long userId, AddCartItemRequest request) {
@@ -45,7 +69,7 @@ public class CartService {
       throw new BusinessException(CartErrorCode.CART_ITEM_INVALID_QUANTITY);
     }
 
-    // 1) 상품 존재/유효성 검증: ProductService 헬퍼 사용
+    // 1) 상품 존재/유효성 검증
     Product product = productService.findProductEntityById(request.getProductId());
 
     // 2) 판매 상태 검증
@@ -56,7 +80,6 @@ public class CartService {
     if (status == ProductStatus.SOLD_OUT) {
       throw new BusinessException(CartErrorCode.CART_ITEM_OUT_OF_STOCK);
     }
-    // FOR_SALE이면 통과
 
     // 3) 장바구니 중복 검증
     boolean exists = cart.getItems().stream()
@@ -72,7 +95,7 @@ public class CartService {
     return item;
   }
 
-  // 기존: changeQuantity(Long userId, Long productId, int quantity)
+  
   public CartItem changeQuantity(Long userId, Long cartItemId, int quantity) {
     Cart cart = getCartByUserId(userId);
 
@@ -81,14 +104,13 @@ public class CartService {
     }
 
     CartItem item = cart.getItems().stream()
-        .filter(i -> i.getId().equals(cartItemId))   // ID 기준으로 검색
+        .filter(i -> i.getId().equals(cartItemId)) // ID 기준
         .findFirst()
         .orElseThrow(() -> new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND));
 
     item.changeQuantity(quantity);
     return item;
   }
-
 
   public void removeItem(Long userId, Long productId) {
     Cart cart = getCartByUserId(userId);

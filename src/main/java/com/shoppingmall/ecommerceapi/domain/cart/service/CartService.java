@@ -95,7 +95,7 @@ public class CartService {
     return item;
   }
 
-  
+
   public CartItem changeQuantity(Long userId, Long cartItemId, int quantity) {
     Cart cart = getCartByUserId(userId);
 
@@ -104,7 +104,7 @@ public class CartService {
     }
 
     CartItem item = cart.getItems().stream()
-        .filter(i -> i.getId().equals(cartItemId)) // ID 기준
+        .filter(i -> cartItemId.equals(i.getId()))// ID 기준
         .findFirst()
         .orElseThrow(() -> new BusinessException(CartErrorCode.CART_ITEM_NOT_FOUND));
 

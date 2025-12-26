@@ -16,6 +16,6 @@ public class AdminOrderItemResponse {
   private Long productId;
   private String productName;
   private Integer quantity;
-  private BigDecimal orderPrice;
+  private Integer orderPrice;
   private BigDecimal totalPrice;
 }

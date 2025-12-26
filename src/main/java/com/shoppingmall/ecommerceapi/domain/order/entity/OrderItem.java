@@ -49,10 +49,9 @@ public class OrderItem {
   @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
-  @Column(name = "order_price", nullable = false, precision = 10, scale = 0)
-  private BigDecimal orderPrice;
+  @Column(name = "order_price", nullable = false)
+  private Integer orderPrice;  // BigDecimal → Integer 변경
 
-  // JPA Auditing 적용
   @CreatedDate
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdAt;
@@ -62,7 +61,7 @@ public class OrderItem {
 
   // 비즈니스 메서드
   public BigDecimal getTotalItemPrice() {
-    return orderPrice.multiply(BigDecimal.valueOf(quantity));
+    return BigDecimal.valueOf(orderPrice).multiply(BigDecimal.valueOf(quantity));
   }
 
   public void updateQuantity(Integer newQuantity) {
@@ -81,7 +80,7 @@ public class OrderItem {
   }
 
   public void validatePrice() {
-    if (orderPrice == null || orderPrice.compareTo(BigDecimal.ZERO) <= 0) {
+    if (orderPrice == null || orderPrice <= 0) {
       throw new IllegalArgumentException("ORDER_ITEM_INVALID_PRICE");
     }
   }

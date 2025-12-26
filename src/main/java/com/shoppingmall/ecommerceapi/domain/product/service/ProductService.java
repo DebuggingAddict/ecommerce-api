@@ -68,7 +68,7 @@ public class ProductService {
     } catch (Exception e) {
       throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_SORT);
     }
-    // 캍[고리
+    // 카테고리
     Page<Product> productPage;
     if (category != null) {
       productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);

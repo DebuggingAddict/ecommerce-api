@@ -3,6 +3,7 @@ package com.shoppingmall.ecommerceapi.domain.product.service;
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
 import com.shoppingmall.ecommerceapi.common.response.PageRequestDTO;
 import com.shoppingmall.ecommerceapi.common.response.PageResponse;
+import com.shoppingmall.ecommerceapi.domain.order.repository.OrderItemRepository;
 import com.shoppingmall.ecommerceapi.domain.product.converter.ProductConverter;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
@@ -25,6 +26,7 @@ public class ProductService {
 
   private final ProductRepository productRepository;
   private final ProductConverter productConverter;
+  private final OrderItemRepository orderItemRepository;
 
   // 상품 등록
   @Transactional
@@ -87,6 +89,11 @@ public class ProductService {
     Product product = productRepository.findById(id)
         .filter(p -> p.getDeletedAt() == null)
         .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_DELETE_NOT_FOUND));
+
+    // 주문 내역 존재 확인
+    if (orderItemRepository.existsByProductId(id)) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_DELETE_FAILED);
+    }
 
     // 더티체킹
     product.delete();

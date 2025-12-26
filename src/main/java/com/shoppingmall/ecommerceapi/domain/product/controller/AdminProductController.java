@@ -23,7 +23,7 @@ public class AdminProductController {
   private final ProductService productService;
 
   // 상품 등록
-  @PostMapping("")
+  @PostMapping
   public Api<ProductResponse> create(
       @Valid @RequestBody ProductCreateRequest request
   ) {

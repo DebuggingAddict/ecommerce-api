@@ -4,6 +4,7 @@ import com.shoppingmall.ecommerceapi.common.api.Api;
 import com.shoppingmall.ecommerceapi.common.code.ApiCode;
 import com.shoppingmall.ecommerceapi.common.code.CommonErrorCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -29,5 +30,14 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(code.getHttpStatus())
         .body(Api.ERROR(code, "예상치 못한 서버 오류가 발생했습니다."));
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Api<Object>> handleValidationException(MethodArgumentNotValidException e) {
+    String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+
+    return ResponseEntity
+        .status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
+        .body(Api.ERROR(CommonErrorCode.BAD_REQUEST, errorMessage));
   }
 }

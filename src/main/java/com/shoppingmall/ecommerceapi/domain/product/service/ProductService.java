@@ -121,9 +121,9 @@ public class ProductService {
     // 카테고리
     Page<Product> productPage;
     if (category != null) {
-      productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);
+      productPage = productRepository.findAllByCategoryAndDeletedAtIsNull(category, pageable);
     } else {
-      productPage = productRepository.findAllByDeleteAtIsNull(pageable);
+      productPage = productRepository.findAllByDeletedAtIsNull(pageable);
     }
 
     List<ProductResponse> content = productPage.getContent().stream()

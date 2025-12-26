@@ -29,7 +29,7 @@ public class AdminProductController {
   ) {
     ProductResponse response = productService.register(request);
 
-    return Api.OK(response);
+    return Api.CREATED(response);
   }
 
   // 상품 수정

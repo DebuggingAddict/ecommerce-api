@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
   // 삭제되지 않은 전체 상품 조회
-  Page<Product> findAllByDeleteAtIsNull(Pageable pageable);
+  Page<Product> findAllByDeletedAtIsNull(Pageable pageable);
 
   // 삭제되지 않은 특정 카테고리 상품 조회
-  Page<Product> findAllByCategoryAndDeleteAtIsNull(ProductCategory productCategory,
+  Page<Product> findAllByCategoryAndDeletedAtIsNull(ProductCategory productCategory,
       Pageable pageable);
 }

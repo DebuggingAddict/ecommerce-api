@@ -6,6 +6,7 @@ import com.shoppingmall.ecommerceapi.common.response.PageResponse;
 import com.shoppingmall.ecommerceapi.domain.product.converter.ProductConverter;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
+import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.entity.Product;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductCategory;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
@@ -28,11 +29,14 @@ public class ProductService {
   // 상품 등록
   @Transactional
   public ProductResponse register(ProductCreateRequest request) {
-    String finalImgSrc = (request.getImgSrc() == null) ? "none.png" : request.getImgSrc();
+    // 이미지 유효성 검사
+    String finalImgSrc = (request.getImgSrc() == null || request.getImgSrc().isBlank())
+        ? "none.png" : request.getImgSrc();
     if (!isValidImageExtension(finalImgSrc)) {
-      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE, "허용되지 않는 이미지 확장자입니다.");
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
     }
 
+    // 재고에 따른 판매 상태
     ProductStatus status =
         (request.getStock() > 0) ? ProductStatus.FOR_SALE : ProductStatus.SOLD_OUT;
 
@@ -40,6 +44,52 @@ public class ProductService {
 
     Product savedProduct = productRepository.save(product);
     return productConverter.toResponse(savedProduct);
+  }
+
+  // 상품 수정
+  @Transactional
+  public ProductResponse updateProduct(Long id, ProductUpdateRequest request) {
+    // 수정할 상품 조회
+    Product product = productRepository.findById(id)
+        .filter(p -> p.getDeletedAt() == null)
+        .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_UPDATE_NOT_FOUND));
+
+    // 이미지 유효성 검사
+    String finalImgSrc = (request.getImgSrc() == null || request.getImgSrc().isBlank())
+        ? "none.png" : request.getImgSrc();
+    if (!isValidImageExtension(finalImgSrc)) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
+    }
+
+    // 재고 0일때 판매중 설정 불가
+    if (request.getStock() == 0 && request.getStatus() == ProductStatus.FOR_SALE) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_STATUS_CONFLICT);
+    }
+
+    // 더티 체킹
+    product.update(
+        request.getName(),
+        request.getDescription(),
+        request.getPrice(),
+        request.getCategory(),
+        request.getStatus(),
+        request.getStock(),
+        finalImgSrc
+    );
+
+    return productConverter.toResponse(product);
+  }
+
+  // 상품 삭제
+  @Transactional
+  public void deleteProduct(Long id) {
+    // 삭제할 상품 조회
+    Product product = productRepository.findById(id)
+        .filter(p -> p.getDeletedAt() == null)
+        .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_DELETE_NOT_FOUND));
+
+    // 더티체킹
+    product.delete();
   }
 
   // 상품 단건 조회

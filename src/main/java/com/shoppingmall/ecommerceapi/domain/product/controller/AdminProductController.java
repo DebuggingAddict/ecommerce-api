@@ -1,11 +1,16 @@
 package com.shoppingmall.ecommerceapi.domain.product.controller;
 
+import com.shoppingmall.ecommerceapi.common.api.Api;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
+import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,9 +22,33 @@ public class AdminProductController {
 
   private final ProductService productService;
 
+  // 상품 등록
   @PostMapping
-  public ResponseEntity<ProductResponse> create(@RequestBody ProductCreateRequest request) {
-    return ResponseEntity.ok(productService.register(request));
+  public Api<ProductResponse> create(
+      @Valid @RequestBody ProductCreateRequest request
+  ) {
+    ProductResponse response = productService.register(request);
+
+    return Api.OK(response);
   }
 
+  // 상품 수정
+  @PutMapping("/{id}")
+  public Api<ProductResponse> update(
+      @PathVariable Long id,
+      @Valid @RequestBody ProductUpdateRequest request
+  ) {
+    ProductResponse response = productService.updateProduct(id, request);
+
+    return Api.OK(response);
+  }
+
+  // 상품 삭제
+  @PatchMapping("/{id}")
+  public Api<Void> delete(
+      @PathVariable Long id) {
+    productService.deleteProduct(id);
+
+    return Api.OK(null);
+  }
 }

@@ -17,7 +17,7 @@ public class AdminProductController {
 
   private final ProductService productService;
 
-  @PostMapping("/admin/products")
+  @PostMapping
   public ResponseEntity<ProductResponse> create(@RequestBody ProductCreateRequest request) {
     return ResponseEntity.ok(productService.register(request));
   }

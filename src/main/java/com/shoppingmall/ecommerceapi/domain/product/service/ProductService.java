@@ -14,9 +14,7 @@ import com.shoppingmall.ecommerceapi.domain.product.repository.ProductRepository
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,21 +54,21 @@ public class ProductService {
   // 상품 전체 조회
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> getProducts(ProductCategory category, PageRequestDTO req) {
-    Sort sort = Sort.by("id").descending();
-
-    if (req.getSort() != null) {
-      sort = switch (req.getSort()) {
-        case "price_asc" -> Sort.by("price").ascending(); // 가격 낮은 순
-        case "price_desc" -> Sort.by("price").descending(); // 가격 높은 순
-        case "name" -> Sort.by("name").ascending(); // 이름순
-        default -> Sort.by("id").descending(); // 최신순(default)
-      };
+    // 페이지 번호, 사이즈
+    if (req.getPage() < 0) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_PAGE);
     }
-    Pageable pageable = PageRequest.of(
-        req.getPage(),
-        req.getSize(),
-        sort
-    );
+    if (req.getSize() <= 0) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_PAGE_SIZE);
+    }
+    // 정렬 기준
+    Pageable pageable;
+    try {
+      pageable = req.toPageable();
+    } catch (Exception e) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_SORT);
+    }
+    // 카테고리
     Page<Product> productPage;
     if (category != null) {
       productPage = productRepository.findAllByCategoryAndDeleteAtIsNull(category, pageable);

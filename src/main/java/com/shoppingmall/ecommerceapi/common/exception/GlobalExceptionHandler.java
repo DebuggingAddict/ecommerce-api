@@ -5,6 +5,7 @@ import com.shoppingmall.ecommerceapi.common.code.ApiCode;
 import com.shoppingmall.ecommerceapi.common.code.CommonErrorCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -14,8 +15,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<Api<Object>> handleBusiness(BusinessException e) {
     ApiCode code = e.getCode();
-
-    // description이 없으면 기본 메시지로 내려도 됨(팀 룰에 맞게)
+    
     String description = (e.getDescription() != null) ? e.getDescription() : code.getMessage();
 
     return ResponseEntity
@@ -39,5 +39,16 @@ public class GlobalExceptionHandler {
     return ResponseEntity
         .status(CommonErrorCode.BAD_REQUEST.getHttpStatus())
         .body(Api.ERROR(CommonErrorCode.BAD_REQUEST, errorMessage));
+  }
+
+  @ExceptionHandler(MissingRequestHeaderException.class)
+  public ResponseEntity<Api<Object>> handleMissingRequestHeader(MissingRequestHeaderException e) {
+    ApiCode code = CommonErrorCode.MISSING_REQUIRED_HEADER;
+
+    String description = "필수 헤더(" + e.getHeaderName() + ")가 누락되었습니다.";
+
+    return ResponseEntity
+        .status(code.getHttpStatus())
+        .body(Api.ERROR(code, description));
   }
 }

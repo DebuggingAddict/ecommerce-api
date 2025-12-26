@@ -25,23 +25,23 @@ public class CartConverter {
 
   // ---------- toResponse (조회용) ----------
 
-  // GET /carts 의 items 요소
-  public static CartItemResponse toCartItemResponse(CartItem item) {
+  // CartItem + Product 정보를 조합해 단건 응답으로 변환
+  public static CartItemResponse toCartItemResponse(
+      CartItem item,
+      String productName,
+      Integer productPrice
+  ) {
     return CartItemResponse.builder()
-        .id(item.getId())                         // cart_items.id
-        .productId(item.getProductId())          // product_id
-        .productName(null)                       // TODO: Product 연동 후 세팅
-        .productPrice(null)                      // TODO: Product 연동 후 세팅
-        .productQuantity(item.getQuantity())     // quantity
+        .id(item.getId())                     // cart_items.id
+        .productId(item.getProductId())       // product_id
+        .productName(productName)             // product.name
+        .productPrice(productPrice)           // product.price
+        .productQuantity(item.getQuantity())  // quantity
         .build();
   }
 
-  // GET /carts 응답 본문
-  public static CartResponse toCartResponse(Cart cart) {
-    List<CartItemResponse> items = cart.getItems().stream()
-        .map(CartConverter::toCartItemResponse)
-        .toList();
-
+  // GET /cart 응답 본문
+  public static CartResponse toCartResponse(Cart cart, List<CartItemResponse> items) {
     return CartResponse.builder()
         .cartId(cart.getId())
         .userId(cart.getUserId())
@@ -52,7 +52,6 @@ public class CartConverter {
 
   // ---------- toResponse (아이템 추가 응답) ----------
 
-  // POST /carts/items 응답
   public static CartItemAddResponse toCartItemAddResponse(Cart cart, CartItem item) {
     return CartItemAddResponse.builder()
         .id(item.getId())
@@ -66,7 +65,6 @@ public class CartConverter {
 
   // ---------- toResponse (수량 변경 응답) ----------
 
-  // PATCH /carts/items/{id} 응답
   public static CartItemQuantityUpdateResponse toCartItemQuantityUpdateResponse(CartItem item) {
     return CartItemQuantityUpdateResponse.builder()
         .id(item.getId())
@@ -76,3 +74,4 @@ public class CartConverter {
         .build();
   }
 }
+

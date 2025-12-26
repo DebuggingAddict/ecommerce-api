@@ -32,8 +32,8 @@ public class CartController {
   // 장바구니 조회 (GET /api/v1/cart)
   @GetMapping
   public Api<CartResponse> getCart(@RequestHeader("X-USER-ID") Long userId) {
-    Cart cart = cartService.getCartByUserId(userId);
-    return Api.OK(CartConverter.toCartResponse(cart));
+    CartResponse response = cartService.getCartResponse(userId);
+    return Api.OK(response);
   }
 
   // 장바구니 담기 (POST /api/v1/cart/items)

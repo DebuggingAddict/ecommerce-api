@@ -21,7 +21,7 @@ public class OpenApiProductController {
   private final ProductService productService;
 
   // 상품 전체 조회
-  @GetMapping("/open-api/products")
+  @GetMapping
   public Api<PageResponse<ProductResponse>> getProducts(
       @RequestParam(required = false) ProductCategory category,
       PageRequestDTO pageRequestDTO
@@ -32,7 +32,7 @@ public class OpenApiProductController {
   }
 
   // 상품 단건 조회
-  @GetMapping("/open-api/products/{id}")
+  @GetMapping("/{id}")
   public Api<ProductResponse> getProduct(
       @PathVariable Long id
   ) {

@@ -2,6 +2,7 @@ package com.shoppingmall.ecommerceapi.domain.product.repository;
 
 import com.shoppingmall.ecommerceapi.domain.product.entity.Product;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductCategory;
+import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
   // 삭제되지 않은 특정 카테고리 상품 조회
   Page<Product> findAllByCategoryAndDeletedAtIsNull(ProductCategory productCategory,
       Pageable pageable);
+
+  // 삭제되지 않은 특정 상태 상품 조회
+  Page<Product> findAllByStatusAndDeletedAtIsNull(ProductStatus status, Pageable pageable);
+
+  // 삭제되지 않은 특정 카테고리 + 상태 상품 조회
+  Page<Product> findAllByCategoryAndStatusAndDeletedAtIsNull(
+      ProductCategory category,
+      ProductStatus status,
+      Pageable pageable
+  );
 }

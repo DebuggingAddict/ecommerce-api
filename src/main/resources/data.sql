@@ -1,4 +1,4 @@
-# 상품 더미 데이터 100개 추가
+-- 상품 더미 데이터 100개 추가
 INSERT INTO products
 (
     name,
@@ -50,7 +50,7 @@ SELECT
     NULL AS deleted_at
 FROM seq;
 
-# 유저 더미 데이터 10개
+-- 유저 더미 데이터 10개
 INSERT INTO users
 (
     address,

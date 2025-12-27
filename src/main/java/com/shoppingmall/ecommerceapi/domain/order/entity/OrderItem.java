@@ -1,5 +1,7 @@
 package com.shoppingmall.ecommerceapi.domain.order.entity;
 
+import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
+import com.shoppingmall.ecommerceapi.domain.order.exception.OrderErrorCode;
 import com.shoppingmall.ecommerceapi.domain.product.entity.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -75,13 +77,13 @@ public class OrderItem {
 
   private void validateQuantityValue(Integer quantity) {
     if (quantity == null || quantity < 1 || quantity > 99) {
-      throw new IllegalArgumentException("ORDER_ITEM_INVALID_QUANTITY");
+      throw new BusinessException(OrderErrorCode.ORDER_ITEM_INVALID_QUANTITY);
     }
   }
 
   public void validatePrice() {
     if (orderPrice == null || orderPrice <= 0) {
-      throw new IllegalArgumentException("ORDER_ITEM_INVALID_PRICE");
+      throw new BusinessException(OrderErrorCode.ORDER_ITEM_INVALID_PRICE);
     }
   }
 }

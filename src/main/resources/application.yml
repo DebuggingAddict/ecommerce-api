@@ -13,20 +13,27 @@ spring:
     password: dev1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
+    defer-datasource-initialization: true  # ✅ Hibernate가 테이블 만든 후 data.sql 실행
     hibernate:
       ddl-auto: create
       #ddl-auto: update # 테이블 없으면 생성, 있으면 수정
       #ddl-auto: validate # 엔티티와 DB스키마의 일치 여부만 검증
-    #    defer-datasource-initialization: true  # ✅ Hibernate가 테이블 만든 후 data.sql 실행
     show-sql: true
     properties:
       hibernate.format_sql: true
       use_sql_comments: true
-      dialect: org.hibernate.dialect.MySQLDialect
+      dialect: org.hibernate.dialect.MySQL8Dialect
   sql:
     init:
       mode: always        # 🚀 data.sql 실행 활성화
       encoding: UTF-8
+      continue-on-error: false  # ✅ 에러 발생 시 즉시 중단 (디버깅용)
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: DEBUG  # 🔍 data.sql 실행 로그
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 token:
   secret:

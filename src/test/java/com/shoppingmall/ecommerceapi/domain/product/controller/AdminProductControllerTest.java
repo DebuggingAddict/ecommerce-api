@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.willThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -138,5 +139,76 @@ public class AdminProductControllerTest {
     mockMvc.perform(patch("/admin/products/{id}", productId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.result").exists());
+  }
+
+  // 필수값 누락 테스트
+  @Test
+  @DisplayName("POST /admin/api/products - 상품명 누락 시 400 반환")
+  void createProduct_invalidName_400() throws Exception {
+    // given
+    ProductCreateRequest request = ProductCreateRequest.builder()
+        .name("")
+        .price(2000)
+        .build();
+
+    // when & then
+    mockMvc.perform(post("/admin/api/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  // 등록 실패 - 재고 수량을 말도 안 되게 크게 등록할 때
+  @Test
+  @DisplayName("POST /admin/products - 재고 수량이 범위를 초과할 경우 400 반환")
+  void createProduct_invalidStock_400() throws Exception {
+    // given
+    ProductCreateRequest request = ProductCreateRequest.builder()
+        .name("딸기")
+        .price(15000)
+        .category(FOOD)
+        .stock(999_999_999)
+        .build();
+
+    // when & then
+    mockMvc.perform(post("/admin/products")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  // 수정 실패 - 수정 시 가격을 음수로 변경 시도
+  @Test
+  @DisplayName("PUT /admin/products/{id} - 가격을 음수로 수정 시 400 반환")
+  void updateProduct_invalidPrice_400() throws Exception {
+    // given
+    Long productId = 1L;
+    ProductUpdateRequest request = ProductUpdateRequest.builder()
+        .name("딸기")
+        .price(-1000)
+        .category(FOOD)
+        .status(ProductStatus.FOR_SALE)
+        .build();
+
+    // when & then
+    mockMvc.perform(put("/admin/products/{id}", productId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
+  }
+
+  // 삭제 실패 - 이미 삭제되었거나 존재하지 않는 상품 삭제 시도
+  @Test
+  @DisplayName("PATCH /admin/products/{id} - 존재하지 않는 상품 삭제 시 404 반환")
+  void deleteProduct_notFound_404() throws Exception {
+    // given
+    Long invalidId = 999L;
+    willThrow(new com.shoppingmall.ecommerceapi.common.exception.BusinessException(
+        com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode.PRODUCT_NOT_FOUND))
+        .given(productService).deleteProduct(invalidId);
+
+    // when & then
+    mockMvc.perform(patch("/admin/products/{id}", invalidId))
+        .andExpect(status().isNotFound());
   }
 }

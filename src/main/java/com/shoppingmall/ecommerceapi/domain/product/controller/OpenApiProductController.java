@@ -7,6 +7,7 @@ import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductCategory;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ public class OpenApiProductController {
   @GetMapping
   public Api<PageResponse<ProductResponse>> getProducts(
       @RequestParam(required = false) ProductCategory category,
-      PageRequestDTO pageRequestDTO
+      @ParameterObject PageRequestDTO pageRequestDTO
   ) {
     PageResponse<ProductResponse> response = productService.getProducts(category, pageRequestDTO);
 

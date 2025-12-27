@@ -125,11 +125,24 @@ public class ProductService {
     } catch (Exception e) {
       throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_SORT);
     }
-    // 카테고리
+
+    // sortType을 ProductStatus로 변환 (Product 도메인에서만 처리)
+    ProductStatus status = convertToProductStatus(req.getSortType());
+
+    // 카테고리 + 상태 조합 필터링
     Page<Product> productPage;
-    if (category != null) {
+    if (category != null && status != null) {
+      // 카테고리 + 상태 모두 지정
+      productPage = productRepository.findAllByCategoryAndStatusAndDeletedAtIsNull(category, status,
+          pageable);
+    } else if (category != null) {
+      // 카테고리만 지정
       productPage = productRepository.findAllByCategoryAndDeletedAtIsNull(category, pageable);
+    } else if (status != null) {
+      // 상태만 지정
+      productPage = productRepository.findAllByStatusAndDeletedAtIsNull(status, pageable);
     } else {
+      // 필터 없음
       productPage = productRepository.findAllByDeletedAtIsNull(pageable);
     }
 
@@ -138,6 +151,23 @@ public class ProductService {
         .toList();
 
     return PageResponse.of(productPage, content, req.getSort());
+  }
+
+  /**
+   * sortType 문자열을 ProductStatus로 변환 잘못된 값이거나 null이면 null 반환 (필터 무시)
+   */
+  private ProductStatus convertToProductStatus(String sortType) {
+    if (sortType == null || sortType.isEmpty()) {
+      return null;
+    }
+    try {
+      // 공백, 큰따옴표, 작은따옴표 제거
+      String cleaned = sortType.trim().replace("\"", "").replace("'", "");
+      ProductStatus status = ProductStatus.valueOf(cleaned.toUpperCase());
+      return status;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   // 이미지 파일 유효성 검사

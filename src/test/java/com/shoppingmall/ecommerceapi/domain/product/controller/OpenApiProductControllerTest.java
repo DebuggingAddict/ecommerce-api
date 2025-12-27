@@ -94,4 +94,60 @@ public class OpenApiProductControllerTest {
         .andExpect(jsonPath("$.body.pageInfo.currentSort").value("FOR_SALE"))
         .andExpect(jsonPath("$.body.pageInfo.currentPage").value(0));
   }
+
+  // 조회 실패 - 존재하지 않는 상품 단건 조회 (404 Not Found)
+  @Test
+  @DisplayName("GET /open-api/products/{id} - 존재하지 않는 ID 조회 시 404 반환")
+  void getProduct_notFound_404() throws Exception {
+    // given
+    Long invalidId = 9999L;
+    given(productService.getProduct(invalidId))
+        .willThrow(new com.shoppingmall.ecommerceapi.common.exception.BusinessException(
+            com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode.PRODUCT_NOT_FOUND));
+
+    // when & then
+    mockMvc.perform(get("/open-api/products/{id}", invalidId))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.result.message").exists());
+  }
+
+  // 페이징 실패 - 잘못된 페이지 번호 요청 (400 Bad Request)
+  @Test
+  @DisplayName("GET /open-api/products - 페이지 번호가 음수일 때 400 반환")
+  void getProducts_invalidPage_400() throws Exception {
+    // given
+    given(productService.getProducts(any(), any(PageRequestDTO.class)))
+        .willThrow(new com.shoppingmall.ecommerceapi.common.exception.BusinessException(
+            com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode.PRODUCT_INVALID_PAGE));
+
+    // when & then
+    mockMvc.perform(get("/open-api/products")
+            .param("page", "-1"))
+        .andExpect(status().isBadRequest());
+  }
+
+  // 파라미터 실패 - 정의되지 않은 카테고리 값 입력 (400 Bad Request)
+  @Test
+  @DisplayName("GET /open-api/products - 존재하지 않는 카테고리 이름 입력 시 400 반환")
+  void getProducts_invalidCategory_400() throws Exception {
+    mockMvc.perform(get("/open-api/products")
+            .param("category", "ELECTRONICS"))
+        .andExpect(status().isBadRequest());
+  }
+
+  // 정렬 실패 - 잘못된 정렬 파라미터 형식 (400 Bad Request)
+  @Test
+  @DisplayName("GET /open-api/products - 잘못된 정렬 기준 요청 시 400 반환")
+  void getProducts_invalidSort_400() throws Exception {
+    // given
+    given(productService.getProducts(any(), any(PageRequestDTO.class)))
+        .willThrow(new com.shoppingmall.ecommerceapi.common.exception.BusinessException(
+            com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode.PRODUCT_INVALID_SORT));
+
+    // when & then
+    mockMvc.perform(get("/open-api/products")
+            .param("sort", "unknwonField,asc"))
+        .andExpect(status().isBadRequest());
+  }
+
 }

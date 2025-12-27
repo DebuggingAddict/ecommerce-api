@@ -9,8 +9,8 @@ server:
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/shoppingmall_db?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
-    password: goormgoorm
+    username: dev
+    password: dev1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -23,10 +23,10 @@ spring:
       hibernate.format_sql: true
       use_sql_comments: true
       dialect: org.hibernate.dialect.MySQLDialect
-#  sql:
-#    init:
-#      mode: always        # 🚀 data.sql 실행 활성화
-#      encoding: UTF-8
+  sql:
+    init:
+      mode: always        # 🚀 data.sql 실행 활성화
+      encoding: UTF-8
 
 token:
   secret:

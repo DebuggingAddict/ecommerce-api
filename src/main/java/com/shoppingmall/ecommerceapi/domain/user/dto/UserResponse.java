@@ -17,7 +17,7 @@ public class UserResponse {
   private String username;
   private String name;
   private String phone;
-  private String postalCode;
+  private String zipCode;
   private String address;
   private String addressDetail;
   private String role;

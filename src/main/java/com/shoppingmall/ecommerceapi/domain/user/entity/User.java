@@ -49,8 +49,8 @@ public class User {
   @Column(nullable = false, length = 13)
   private String phone;
 
-  @Column(length = 5)
-  private String postalCode;
+  @Column(name = "zip_code", length = 5)
+  private String zipCode;
 
   @Column(length = 200)
   private String address;
@@ -93,11 +93,11 @@ public class User {
    * 회원 정보 수정
    */
   public void updateProfile(String username, String name, String phone,
-      String postalCode, String address, String addressDetail) {
+      String zipCode, String address, String addressDetail) {
     this.username = username;
     this.name = name;
     this.phone = phone;
-    this.postalCode = postalCode;
+    this.zipCode = zipCode;
     this.address = address;
     this.addressDetail = addressDetail;
   }

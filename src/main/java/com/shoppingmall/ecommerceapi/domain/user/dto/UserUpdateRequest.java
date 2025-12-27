@@ -24,7 +24,7 @@ public class UserUpdateRequest {
   private String phone;
 
   @Pattern(regexp = "^\\d{5}$", message = "우편번호는 5자리 숫자여야 합니다")
-  private String postalCode;
+  private String zipCode;
 
   @Size(min = 5, max = 200, message = "기본주소는 5~200자이어야 합니다")
   private String address;

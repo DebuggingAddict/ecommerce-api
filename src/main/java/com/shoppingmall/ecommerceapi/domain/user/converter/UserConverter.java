@@ -27,7 +27,7 @@ public class UserConverter {
         .username(user.getUsername())
         .name(user.getName())
         .phone(user.getPhone())
-        .postalCode(user.getPostalCode())
+        .zipCode(user.getZipCode())
         .address(user.getAddress())
         .addressDetail(user.getAddressDetail())
         .role(user.getRole().name())

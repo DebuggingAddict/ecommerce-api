@@ -1,5 +1,7 @@
 package com.shoppingmall.ecommerceapi.domain.cart.entity;
 
+import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
+import com.shoppingmall.ecommerceapi.domain.cart.exception.CartErrorCode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -71,7 +73,10 @@ public class CartItem {
 
   public void changeQuantity(int quantity) {
     if (quantity <= 0) {
-      throw new IllegalArgumentException("상품 수량은 항상 양수여야합니다.");
+      throw new BusinessException(
+          CartErrorCode.CART_ITEM_INVALID_QUANTITY,
+          "상품 수량은 항상 양수여야합니다."
+      );
     }
     this.quantity = quantity;
   }

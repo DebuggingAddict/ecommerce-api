@@ -1,6 +1,8 @@
 package com.shoppingmall.ecommerceapi.domain.order.entity;
 
+import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
 import com.shoppingmall.ecommerceapi.domain.order.entity.enums.OrderStatus;
+import com.shoppingmall.ecommerceapi.domain.order.exception.OrderErrorCode;
 import com.shoppingmall.ecommerceapi.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -97,21 +99,21 @@ public class Order {
 
   public void cancel() {
     if (this.orderStatus != OrderStatus.PENDING) {
-      throw new IllegalStateException("ORDER_STATUS_CONFLICT");
+      throw new BusinessException(OrderErrorCode.ORDER_STATUS_CONFLICT);
     }
     this.orderStatus = OrderStatus.CANCELLED;
   }
 
   public void confirmPayment() {
     if (this.orderStatus != OrderStatus.PENDING) {
-      throw new IllegalStateException("ORDER_STATUS_CONFLICT");
+      throw new BusinessException(OrderErrorCode.ORDER_STATUS_CONFLICT);
     }
     this.orderStatus = OrderStatus.PAID;
   }
 
   public void validateTotalPrice(BigDecimal calculatedTotal) {
     if (!this.totalPrice.equals(calculatedTotal)) {
-      throw new IllegalArgumentException("ORDER_AMOUNT_MISMATCH");
+      throw new BusinessException(OrderErrorCode.ORDER_AMOUNT_MISMATCH);
     }
   }
 

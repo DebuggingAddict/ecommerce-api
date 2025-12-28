@@ -59,6 +59,7 @@ public class Product {
   @Column(nullable = false)
   private String imgSrc = "none.png";
 
+  @Builder.Default
   private Boolean isActive = true;
 
   @CreatedDate

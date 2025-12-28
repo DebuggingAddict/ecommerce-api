@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/admin/products")
+@RequestMapping("/api/admin/products")
 @RestController
 public class AdminProductController {
 

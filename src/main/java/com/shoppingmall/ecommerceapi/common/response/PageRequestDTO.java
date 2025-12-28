@@ -1,7 +1,10 @@
 package com.shoppingmall.ecommerceapi.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageRequest;
@@ -10,6 +13,9 @@ import org.springframework.data.domain.Sort;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @ParameterObject
 @Schema(name = "PageRequestDTO", description = "페이지 요청 정보 DTO")
 public class PageRequestDTO {

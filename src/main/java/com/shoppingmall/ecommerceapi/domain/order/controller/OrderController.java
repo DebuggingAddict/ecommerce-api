@@ -53,7 +53,7 @@ public class OrderController {
     PageResponse<OrderResponse> pageResponse = PageResponse.of(
         orderPage,
         orderPage.getContent(),
-        pageRequestDTO.getSortType()
+        pageRequestDTO.getSort()
     );
 
     return Api.OK(pageResponse);

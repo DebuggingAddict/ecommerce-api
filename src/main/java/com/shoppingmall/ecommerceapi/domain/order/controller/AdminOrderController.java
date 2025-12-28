@@ -42,7 +42,7 @@ public class AdminOrderController {
     PageResponse<AdminOrderResponse> pageResponse = PageResponse.of(
         orderPage,
         orderPage.getContent(),
-        pageRequestDTO.getSortType()
+        pageRequestDTO.getSort()
     );
 
     return Api.OK(pageResponse);

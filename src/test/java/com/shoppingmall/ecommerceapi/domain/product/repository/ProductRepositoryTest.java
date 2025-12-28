@@ -44,9 +44,9 @@ class ProductRepositoryTest {
   void setUp() {
     pageable = PageRequest.of(0, 100);
 
-    foodName = "유기농 사과_" + UUID.randomUUID().toString().substring(0, 8);
-    soldOutName = "품절된 우유_" + UUID.randomUUID().toString().substring(0, 8);
-    fashionName = "청바지_" + UUID.randomUUID().toString().substring(0, 8);
+    foodName = "유기농 사과" + UUID.randomUUID().toString().substring(0, 8);
+    soldOutName = "품절된 우유" + UUID.randomUUID().toString().substring(0, 8);
+    fashionName = "청바지" + UUID.randomUUID().toString().substring(0, 8);
 
     productRepository.save(Product.builder()
         .name(foodName).price(5000).stock(100)

@@ -82,8 +82,9 @@ public class OrderService {
       order.addOrderItem(orderItem);
       calculatedTotal = calculatedTotal.add(orderItem.getTotalItemPrice());
 
-      // 재고 차감
-      product.updateStock(product.getStock() - itemRequest.getQuantity());
+      // 재고 차감 (delta = -quantity)
+      product.updateStock(-itemRequest.getQuantity());
+
     }
 
     // 총 금액 검증
@@ -159,7 +160,7 @@ public class OrderService {
     // 재고 복구
     for (OrderItem orderItem : order.getOrderItems()) {
       Product product = orderItem.getProduct();
-      product.updateStock(product.getStock() + orderItem.getQuantity());
+      product.updateStock(orderItem.getQuantity());
     }
   }
 

@@ -91,6 +91,8 @@ class ProductRepositoryTest {
 
     // then
     assertThat(result.getContent()).extracting("category").containsOnly(ProductCategory.FOOD);
+    assertThat(result.getContent()).extracting("name")
+        .doesNotContain("삭제된 티셔츠_TEST");
     assertThat(result.getContent()).extracting("name").contains(foodName, soldOutName);
   }
 

@@ -149,5 +149,4 @@ public class OpenApiProductControllerTest {
             .param("sort", "unknwonField,asc"))
         .andExpect(status().isBadRequest());
   }
-
 }

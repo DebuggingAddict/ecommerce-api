@@ -44,11 +44,11 @@ class CartControllerTest {
   @MockitoBean
   CartService cartService;
 
-  private static final String BASE_URL = "/api/v1/cart";
+  private static final String BASE_URL = "/api/carts";
   private static final String USER_HEADER = "X-USER-ID";
 
   @Test
-  @DisplayName("GET /api/v1/cart - 장바구니 조회 성공")
+  @DisplayName("GET" + BASE_URL + "- 장바구니 조회 성공")
   void getCart_success() throws Exception {
     // given
     Long userId = 1L;
@@ -71,14 +71,14 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("GET /api/v1/cart - 헤더 없으면 400")
+  @DisplayName("GET" + BASE_URL + "- 헤더 없으면 400")
   void getCart_missingHeader_400() throws Exception {
     mockMvc.perform(get(BASE_URL))
         .andExpect(status().isBadRequest());
   }
 
   @Test
-  @DisplayName("POST /api/v1/cart/items - 장바구니 담기 성공")
+  @DisplayName("POST" + BASE_URL + "/items - 장바구니 담기 성공")
   void addItem_success() throws Exception {
     // given
     Long userId = 1L;
@@ -112,7 +112,7 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("POST /api/v1/cart/items - quantity가 0이면 @Valid로 400")
+  @DisplayName("POST" + BASE_URL + "/items - quantity가 0이면 @Valid로 400")
   void addItem_invalidBody_400() throws Exception {
     // given
     Long userId = 1L;
@@ -130,7 +130,7 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("PATCH /api/v1/cart/items/{id} - 수량 변경 성공")
+  @DisplayName("PATCH" + BASE_URL + "/items/{id} - 수량 변경 성공")
   void changeQuantity_success() throws Exception {
     // given
     Long userId = 1L;
@@ -159,7 +159,7 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("PATCH /api/v1/cart/items/{id} - quantity가 0이면 @Valid로 400")
+  @DisplayName("PATCH " + BASE_URL + "/items/{id} - quantity가 0이면 @Valid로 400")
   void changeQuantity_invalidBody_400() throws Exception {
     // given
     Long userId = 1L;
@@ -178,7 +178,7 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("DELETE /api/v1/cart/items/{productId} - 특정 상품 삭제 성공")
+  @DisplayName("DELETE " + BASE_URL + "/items/{productId} - 특정 상품 삭제 성공")
   void removeItem_success() throws Exception {
     // given
     Long userId = 1L;
@@ -195,7 +195,7 @@ class CartControllerTest {
   }
 
   @Test
-  @DisplayName("DELETE /api/v1/cart/items - 장바구니 비우기 성공")
+  @DisplayName("DELETE " + BASE_URL + "/items - 장바구니 비우기 성공")
   void clearCart_success() throws Exception {
     // given
     Long userId = 1L;

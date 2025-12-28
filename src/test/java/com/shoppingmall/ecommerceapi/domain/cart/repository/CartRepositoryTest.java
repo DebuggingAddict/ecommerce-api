@@ -24,11 +24,13 @@ class CartRepositoryTest {
     this.cartRepository = cartRepository;
   }
 
+  static Long TEST_USER_ID = 60L;
+
   @Test
   @DisplayName("유저ID로 카트 찾기")
   void testFindCartByUserId() {
     // Given
-    Long userId = 1L;
+    Long userId = TEST_USER_ID;
     Cart saved = cartRepository.save(Cart.builder()
         .userId(userId)
         .build());
@@ -46,7 +48,7 @@ class CartRepositoryTest {
   @DisplayName("유저ID로 카트 존재 여부 확인")
   void testExistsByUserId() {
     // Given
-    Long userId = 10L;
+    Long userId = TEST_USER_ID;
     Long notExistsUserId = 999L;
 
     cartRepository.save(Cart.builder()

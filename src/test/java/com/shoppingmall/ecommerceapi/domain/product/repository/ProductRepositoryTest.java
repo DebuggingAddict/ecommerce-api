@@ -14,14 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(ProductRepositoryTest.TestConfig.class)
+@ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ProductRepositoryTest {
 
@@ -44,9 +44,9 @@ class ProductRepositoryTest {
   void setUp() {
     pageable = PageRequest.of(0, 100);
 
-    foodName = "유기농 사과_" + UUID.randomUUID().toString().substring(0, 8);
-    soldOutName = "품절된 우유_" + UUID.randomUUID().toString().substring(0, 8);
-    fashionName = "청바지_" + UUID.randomUUID().toString().substring(0, 8);
+    foodName = "유기농 사과" + UUID.randomUUID().toString().substring(0, 8);
+    soldOutName = "품절된 우유" + UUID.randomUUID().toString().substring(0, 8);
+    fashionName = "청바지" + UUID.randomUUID().toString().substring(0, 8);
 
     productRepository.save(Product.builder()
         .name(foodName).price(5000).stock(100)
@@ -91,6 +91,8 @@ class ProductRepositoryTest {
 
     // then
     assertThat(result.getContent()).extracting("category").containsOnly(ProductCategory.FOOD);
+    assertThat(result.getContent()).extracting("name")
+        .doesNotContain("삭제된 티셔츠_TEST");
     assertThat(result.getContent()).extracting("name").contains(foodName, soldOutName);
   }
 

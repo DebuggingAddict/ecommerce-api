@@ -44,7 +44,7 @@ public class AdminProductControllerTest {
 
   // 상품 등록 테스트
   @Test
-  @DisplayName("POST /admin/v1/products - 상품 등록 성공")
+  @DisplayName("POST /api/admin/products - 상품 등록 성공")
   void createProduct_success() throws Exception {
     // given
     ProductCreateRequest request = ProductCreateRequest.builder()
@@ -70,7 +70,7 @@ public class AdminProductControllerTest {
     given(productService.register(any(ProductCreateRequest.class))).willReturn(response);
 
     // when & then
-    mockMvc.perform(post("/admin/products")
+    mockMvc.perform(post("/api/admin/products")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated())
@@ -85,7 +85,7 @@ public class AdminProductControllerTest {
 
   // 상품 수정 테스트
   @Test
-  @DisplayName("PUT /admin/v1/products/{id} - 상품 수정 성공")
+  @DisplayName("PUT /api/admin/products/{id} - 상품 수정 성공")
   void updateProduct_success() throws Exception {
     // given
     Long productId = 1L;
@@ -114,7 +114,7 @@ public class AdminProductControllerTest {
         response);
 
     // when & then
-    mockMvc.perform(put("/admin/products/{id}", productId)
+    mockMvc.perform(put("/api/admin/products/{id}", productId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
@@ -129,21 +129,21 @@ public class AdminProductControllerTest {
 
   // 상품 삭제 테스트
   @Test
-  @DisplayName("PATCH /admin/products/{id} - 상품 삭제 성공")
+  @DisplayName("PATCH /api/admin/products/{id} - 상품 삭제 성공")
   void deleteProduct_success() throws Exception {
     //given
     Long productId = 1L;
     willDoNothing().given(productService).deleteProduct(productId);
 
     // when & then
-    mockMvc.perform(patch("/admin/products/{id}", productId))
+    mockMvc.perform(patch("/api/admin/products/{id}", productId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.result").exists());
   }
 
   // 필수값 누락 테스트
   @Test
-  @DisplayName("POST /admin/api/products - 상품명 누락 시 400 반환")
+  @DisplayName("POST /api/admin/products - 상품명 누락 시 400 반환")
   void createProduct_invalidName_400() throws Exception {
     // given
     ProductCreateRequest request = ProductCreateRequest.builder()
@@ -152,7 +152,7 @@ public class AdminProductControllerTest {
         .build();
 
     // when & then
-    mockMvc.perform(post("/admin/api/products")
+    mockMvc.perform(post("/api/admin/products")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -160,7 +160,7 @@ public class AdminProductControllerTest {
 
   // 등록 실패 - 재고 수량을 말도 안 되게 크게 등록할 때
   @Test
-  @DisplayName("POST /admin/products - 재고 수량이 범위를 초과할 경우 400 반환")
+  @DisplayName("POST /api/admin/products - 재고 수량이 범위를 초과할 경우 400 반환")
   void createProduct_invalidStock_400() throws Exception {
     // given
     ProductCreateRequest request = ProductCreateRequest.builder()
@@ -171,7 +171,7 @@ public class AdminProductControllerTest {
         .build();
 
     // when & then
-    mockMvc.perform(post("/admin/products")
+    mockMvc.perform(post("/api/admin/products")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -179,7 +179,7 @@ public class AdminProductControllerTest {
 
   // 수정 실패 - 수정 시 가격을 음수로 변경 시도
   @Test
-  @DisplayName("PUT /admin/products/{id} - 가격을 음수로 수정 시 400 반환")
+  @DisplayName("PUT /api/admin/products/{id} - 가격을 음수로 수정 시 400 반환")
   void updateProduct_invalidPrice_400() throws Exception {
     // given
     Long productId = 1L;
@@ -191,7 +191,7 @@ public class AdminProductControllerTest {
         .build();
 
     // when & then
-    mockMvc.perform(put("/admin/products/{id}", productId)
+    mockMvc.perform(put("/api/admin/products/{id}", productId)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -199,7 +199,7 @@ public class AdminProductControllerTest {
 
   // 삭제 실패 - 이미 삭제되었거나 존재하지 않는 상품 삭제 시도
   @Test
-  @DisplayName("PATCH /admin/products/{id} - 존재하지 않는 상품 삭제 시 404 반환")
+  @DisplayName("PATCH /api/admin/products/{id} - 존재하지 않는 상품 삭제 시 404 반환")
   void deleteProduct_notFound_404() throws Exception {
     // given
     Long invalidId = 999L;
@@ -208,7 +208,7 @@ public class AdminProductControllerTest {
         .given(productService).deleteProduct(invalidId);
 
     // when & then
-    mockMvc.perform(patch("/admin/products/{id}", invalidId))
+    mockMvc.perform(patch("/api/admin/products/{id}", invalidId))
         .andExpect(status().isNotFound());
   }
 }

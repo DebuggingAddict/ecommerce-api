@@ -3,7 +3,6 @@ package com.shoppingmall.ecommerceapi.common.exception;
 import com.shoppingmall.ecommerceapi.common.api.Api;
 import com.shoppingmall.ecommerceapi.common.code.ApiCode;
 import com.shoppingmall.ecommerceapi.common.code.CommonErrorCode;
-import com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -58,7 +57,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<Api<Object>> handleHttpMessageNotReadable(
       HttpMessageNotReadableException e) {
-    ApiCode code = ProductErrorCode.PRODUCT_INVALID_CATEGORY;
+    ApiCode code = CommonErrorCode.BAD_REQUEST;
 
     String description = "요청 본문의 형식이 잘못되었거나 유효하지 않은 값이 포함되어 있습니다. (Enum 타입 확인)";
 

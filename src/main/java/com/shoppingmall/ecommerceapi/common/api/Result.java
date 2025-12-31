@@ -19,15 +19,15 @@ public class Result {
   public static Result of(ApiCode apiCode) {
     return Result.builder()
         .code(apiCode.getCode())
-        .message(apiCode.getMessage())
-        .description(null)
+        .message(apiCode.toString())
+        .description(apiCode.getMessage())
         .build();
   }
 
   public static Result of(ApiCode apiCode, String description) {
     return Result.builder()
         .code(apiCode.getCode())
-        .message(apiCode.getMessage())
+        .message(apiCode.toString())
         .description(description)
         .build();
   }

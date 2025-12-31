@@ -76,6 +76,11 @@ public class Product {
   public void update(String name, String description, Integer price,
       ProductCategory category, ProductStatus status,
       Integer stock, String imgSrc) {
+    // 재고 음수인가 검증
+    validateStock(stock);
+    // 재고 0인데 판매중으로 설정하려는가? 검증
+    validateStatusWithStock(stock, status);
+
     this.name = name;
     this.description = description;
     this.price = price;
@@ -87,6 +92,10 @@ public class Product {
 
   // 상품 삭제
   public void delete() {
+    if (this.isActive == false) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_DELETE_NOT_FOUND);
+    }
+
     this.isActive = false;
     this.deletedAt = LocalDateTime.now();
     this.status = ProductStatus.STOP_SALE;
@@ -113,6 +122,19 @@ public class Product {
       this.status = ProductStatus.FOR_SALE;
     } else {
       this.status = ProductStatus.SOLD_OUT;
+    }
+  }
+
+  // 내부 검증
+  private void validateStock(int stock) {
+    if (stock < 0) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_STOCK);
+    }
+  }
+
+  private void validateStatusWithStock(int stock, ProductStatus status) {
+    if (stock == 0 && status == ProductStatus.FOR_SALE) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_STATUS_CONFLICT);
     }
   }
 }

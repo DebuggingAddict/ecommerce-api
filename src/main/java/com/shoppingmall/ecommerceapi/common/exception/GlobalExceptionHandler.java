@@ -3,12 +3,13 @@ package com.shoppingmall.ecommerceapi.common.exception;
 import com.shoppingmall.ecommerceapi.common.api.Api;
 import com.shoppingmall.ecommerceapi.common.code.ApiCode;
 import com.shoppingmall.ecommerceapi.common.code.CommonErrorCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -53,16 +54,15 @@ public class GlobalExceptionHandler {
         .body(Api.ERROR(code, description));
   }
 
-  // 추가된 부분: 파라미터 타입 불일치 (Enum 변환 실패 등) 처리
-  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<Api<Object>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<Api<Object>> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException e) {
     ApiCode code = CommonErrorCode.BAD_REQUEST;
 
-    String description = String.format("잘못된 파라미터 값입니다: '%s' (필드명: %s)",
-        e.getValue(), e.getName());
+    String description = "요청 본문의 형식이 잘못되었거나 유효하지 않은 값이 포함되어 있습니다. (Enum 타입 확인)";
 
     return ResponseEntity
-        .status(code.getHttpStatus())
+        .status(HttpStatus.BAD_REQUEST)
         .body(Api.ERROR(code, description));
   }
 }

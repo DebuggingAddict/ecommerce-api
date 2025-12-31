@@ -20,7 +20,7 @@ public class Result {
     return Result.builder()
         .code(apiCode.getCode())
         .message(apiCode.toString())
-        .description(null)
+        .description(apiCode.getMessage())
         .build();
   }
 

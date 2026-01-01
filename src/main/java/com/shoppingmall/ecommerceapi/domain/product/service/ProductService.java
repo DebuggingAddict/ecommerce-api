@@ -1,6 +1,7 @@
 package com.shoppingmall.ecommerceapi.domain.product.service;
 
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
+import com.shoppingmall.ecommerceapi.common.infra.S3Service;
 import com.shoppingmall.ecommerceapi.common.response.PageRequestDTO;
 import com.shoppingmall.ecommerceapi.common.response.PageResponse;
 import com.shoppingmall.ecommerceapi.domain.order.repository.OrderItemRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -27,15 +29,16 @@ public class ProductService {
   private final ProductRepository productRepository;
   private final ProductConverter productConverter;
   private final OrderItemRepository orderItemRepository;
+  private final S3Service s3Service;
 
   // 상품 등록
   @Transactional
-  public ProductResponse register(ProductCreateRequest request) {
-    // 이미지 유효성 검사
-    String finalImgSrc = (request.getImgSrc() == null || request.getImgSrc().isBlank())
-        ? "none.png" : request.getImgSrc();
-    if (!isValidImageExtension(finalImgSrc)) {
-      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
+  public ProductResponse register(ProductCreateRequest request, MultipartFile image) {
+    String finalImgSrc = "none.png";
+
+    // 이미지가 넘어왔을 경우에만 S3 업로드 실행
+    if (image != null && !image.isEmpty()) {
+      finalImgSrc = s3Service.uploadFile(image);
     }
 
     // 재고에 따른 판매 상태

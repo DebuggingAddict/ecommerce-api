@@ -55,8 +55,7 @@ public class Product {
   @Column(nullable = false)
   private Integer stock = 0;
 
-  @Builder.Default
-  @Column(nullable = false)
+  @Column(nullable = false, length = 700)
   private String imgSrc = "none.png";
 
   @Builder.Default

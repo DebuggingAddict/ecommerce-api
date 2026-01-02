@@ -55,6 +55,7 @@ public class OpenApiProductControllerTest {
 
     given(productService.getProduct(productId)).willReturn(response);
 
+    // when & then
     mockMvc.perform(get("/open-api/products/{id}", productId))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.body.name").value("딸기"))

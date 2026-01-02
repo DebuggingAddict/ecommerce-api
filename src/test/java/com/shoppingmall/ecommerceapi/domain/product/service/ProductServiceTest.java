@@ -3,11 +3,14 @@ package com.shoppingmall.ecommerceapi.domain.product.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
+import com.shoppingmall.ecommerceapi.common.infra.S3Service;
 import com.shoppingmall.ecommerceapi.common.response.PageRequestDTO;
 import com.shoppingmall.ecommerceapi.domain.order.repository.OrderItemRepository;
 import com.shoppingmall.ecommerceapi.domain.product.converter.ProductConverter;
@@ -24,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -40,6 +44,9 @@ class ProductServiceTest {
   @Mock
   private OrderItemRepository orderItemRepository;
 
+  @Mock
+  private S3Service s3Service;
+
   // 상품 등록 - 잘못된 이미지 확장자 예외 처리 테스트
   @Test
   @DisplayName("상품 등록 - 잘못된 이미지 확장자 예외 처리")
@@ -47,16 +54,42 @@ class ProductServiceTest {
     // given
     ProductCreateRequest request = ProductCreateRequest.builder()
         .name("딸기")
-        .imgSrc("goorm.exe")
         .stock(10)
         .price(1000)
         .build();
 
+    MockMultipartFile invalidFile = new MockMultipartFile("image", "test.exe",
+        "application/octet-stream", "content".getBytes());
+
     // when & then
     BusinessException exception = assertThrows(BusinessException.class, () -> {
-      productService.register(request);
+      productService.register(request, invalidFile);
     });
     assertEquals(ProductErrorCode.PRODUCT_INVALID_IMAGE, exception.getCode());
+  }
+
+  // 상품 등록 - DB 저장 실패 시 s3 파일 삭제 테스트
+  @Test
+  @DisplayName("상품 등록 - DB 저장 실패 시 s3 파일 삭제 확인(롤백)")
+  void register_dbFail_deleteS3File() {
+    // given
+    ProductCreateRequest request = ProductCreateRequest.builder()
+        .name("딸기")
+        .stock(10)
+        .price(1000)
+        .build();
+
+    MockMultipartFile file = new MockMultipartFile("image", "test.jpg", "image/png",
+        "content".getBytes());
+    String fakeUrl = "https://s3.com/test.jpg";
+
+    given(s3Service.uploadFile(any())).willReturn(fakeUrl);
+    given(productConverter.toEntity(any(), anyString(), any())).willReturn(new Product());
+    given(productRepository.save(any())).willReturn(new RuntimeException("DB 에러"));
+
+    // when & then
+    assertThrows(RuntimeException.class, () -> productService.register(request, file));
+    verify(s3Service).deleteFile(fakeUrl);
   }
 
   // 상품 등록 - 재고에 따른 판매상태 테스트
@@ -71,30 +104,36 @@ class ProductServiceTest {
         .willReturn(new Product());
 
     // when & then
-    productService.register(request);
+    productService.register(request, null);
     verify(productConverter).toEntity(any(), any(), eq(ProductStatus.SOLD_OUT));
   }
 
   // 상품 수정 - 재고가 0일때 판매중 설정 불가 테스트
   @Test
-  @DisplayName("상품 수정 - 재고가 0일때 판매중으로 변경시 예외처리")
-  void updateProduct_stockZeroStatusConflict_throwsException() {
+  @DisplayName("상품 수정 - 재고가 0일때 판매중으로 변경시 예외처리 + S3 파일 삭제 확인")
+  void updateProduct_stockValidationFail_deleteS3() {
     // given
     Long productId = 1L;
-    Product product = Product.builder().id(productId).stock(10).build();
+    Product product = Product.builder().id(productId).stock(10).imgSrc("old.png").build();
     ProductUpdateRequest request = ProductUpdateRequest.builder()
         .stock(0)
         .status(ProductStatus.FOR_SALE)
-        .imgSrc("test.png")
         .build();
 
+    MockMultipartFile newFile = new MockMultipartFile("image", "new.png", "image/png",
+        "data".getBytes());
+    String newS3Url = "https://s3.com/newProduct.png";
+
     given(productRepository.findById(productId)).willReturn(Optional.of(product));
+    given(s3Service.uploadFile(any())).willReturn(newS3Url);
 
     // when & then
-    BusinessException exception = assertThrows(BusinessException.class, () -> {
-      productService.updateProduct(productId, request);
-    });
+    BusinessException exception = assertThrows(BusinessException.class, () ->
+        productService.updateProduct(productId, request, newFile)
+    );
     assertEquals(ProductErrorCode.PRODUCT_STATUS_CONFLICT, exception.getCode());
+
+    verify(s3Service).deleteFile(newS3Url);
   }
 
   // 상품 삭제 - 삭제된 상품 수정 테스트
@@ -105,16 +144,22 @@ class ProductServiceTest {
     Long productId = 1L;
     Product deletedProduct = Product.builder()
         .id(productId)
+        .name("삭제된 상품")
         .deletedAt(java.time.LocalDateTime.now())
         .build();
 
     given(productRepository.findById(productId)).willReturn(Optional.of(deletedProduct));
 
+    ProductUpdateRequest request = ProductUpdateRequest.builder()
+        .name("수정된 이름").build();
+
     // when & then
     BusinessException exception = assertThrows(BusinessException.class, () -> {
-      productService.updateProduct(productId, any(ProductUpdateRequest.class));
+      productService.updateProduct(productId, request, null);
     });
     assertEquals(ProductErrorCode.PRODUCT_UPDATE_NOT_FOUND, exception.getCode());
+    // 삭제된 상품이라 s3 업로드 로직이나 다른 로직이 실행되면 안됨
+    verify(s3Service, never()).uploadFile(any());
   }
 
   // 상품 삭제 - 주문 내역 존재 하는 상품 삭제 테스트

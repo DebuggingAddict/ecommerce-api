@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,12 +36,13 @@ public class AdminProductController {
   }
 
   // 상품 수정
-  @PutMapping("/{id}")
+  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> update(
       @PathVariable Long id,
-      @Valid @RequestBody ProductUpdateRequest request
+      @Valid @RequestPart("request") ProductUpdateRequest request,
+      @RequestPart(value = "image", required = false) MultipartFile image
   ) {
-    ProductResponse response = productService.updateProduct(id, request);
+    ProductResponse response = productService.updateProduct(id, request, image);
 
     return Api.OK(response);
   }

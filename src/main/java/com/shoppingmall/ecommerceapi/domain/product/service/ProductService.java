@@ -35,54 +35,84 @@ public class ProductService {
   @Transactional
   public ProductResponse register(ProductCreateRequest request, MultipartFile image) {
     String finalImgSrc = "none.png";
+    boolean isUploaded = false;
 
-    // 이미지가 넘어왔을 경우에만 S3 업로드 실행
+    // 이미지가 넘어왔을 경우에만 S3 업로드 실행, 유효성 검사
     if (image != null && !image.isEmpty()) {
+      validateImageFile(image);
       finalImgSrc = s3Service.uploadFile(image);
+      isUploaded = true;
     }
 
-    // 재고에 따른 판매 상태
-    ProductStatus status =
-        (request.getStock() > 0) ? ProductStatus.FOR_SALE : ProductStatus.SOLD_OUT;
+    /**
+     * 재고에 따라 판매상태 변경
+     * DB 실패 시 S3 롤백
+     */
+    try {
+      ProductStatus status =
+          (request.getStock() > 0) ? ProductStatus.FOR_SALE : ProductStatus.SOLD_OUT;
+      Product product = productConverter.toEntity(request, finalImgSrc, status);
+      Product savedProduct = productRepository.save(product);
 
-    Product product = productConverter.toEntity(request, finalImgSrc, status);
-
-    Product savedProduct = productRepository.save(product);
-    return productConverter.toResponse(savedProduct);
+      return productConverter.toResponse(savedProduct);
+    } catch (Exception e) {
+      if (isUploaded) {
+        s3Service.deleteFile(finalImgSrc);
+      }
+      throw e;
+    }
   }
 
   // 상품 수정
   @Transactional
-  public ProductResponse updateProduct(Long id, ProductUpdateRequest request) {
+  public ProductResponse updateProduct(Long id, ProductUpdateRequest request, MultipartFile image) {
     // 수정할 상품 조회
     Product product = productRepository.findById(id)
         .filter(p -> p.getDeletedAt() == null)
         .orElseThrow(() -> new BusinessException(ProductErrorCode.PRODUCT_UPDATE_NOT_FOUND));
 
-    // 이미지 유효성 검사
-    String finalImgSrc = (request.getImgSrc() == null || request.getImgSrc().isBlank())
-        ? "none.png" : request.getImgSrc();
-    if (!isValidImageExtension(finalImgSrc)) {
-      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
+    // 기존 이미지 Url 보관, 기본값은 기존 이미지
+    String oldImgSrc = product.getImgSrc();
+    String finalImgSrc = oldImgSrc;
+    boolean isNewUploaded = false;
+
+    // 새로운 파일이 넘어왓을때만 S3 업로드 진행
+    if (image != null && !image.isEmpty()) {
+      validateImageFile(image);
+      finalImgSrc = s3Service.uploadFile(image);
+      isNewUploaded = true;
     }
 
     // 재고 0일때 판매중 설정 불가
-    if (request.getStock() == 0 && request.getStatus() == ProductStatus.FOR_SALE) {
-      throw new BusinessException(ProductErrorCode.PRODUCT_STATUS_CONFLICT);
+    try {
+      if (request.getStock() == 0 && request.getStatus() == ProductStatus.FOR_SALE) {
+        throw new BusinessException(ProductErrorCode.PRODUCT_STATUS_CONFLICT);
+      }
+
+      // 더티 체킹
+      product.update(
+          request.getName(),
+          request.getDescription(),
+          request.getPrice(),
+          request.getCategory(),
+          request.getStatus(),
+          request.getStock(),
+          finalImgSrc
+      );
+
+      // 업데이트 성공했으면 기존 이미지가 none.png가 아닐 경우 S3에서 삭제
+      if (isNewUploaded && !oldImgSrc.equals("none.png")) {
+        s3Service.deleteFile(oldImgSrc);
+      }
+      return productConverter.toResponse(product);
+
+      // DB 반영 실패하면 새로 업로드한 S3 파일 삭제(롤백)
+    } catch (Exception e) {
+      if (isNewUploaded) {
+        s3Service.deleteFile(finalImgSrc);
+      }
+      throw e;
     }
-
-    // 더티 체킹
-    product.update(
-        request.getName(),
-        request.getDescription(),
-        request.getPrice(),
-        request.getCategory(),
-        request.getStatus(),
-        request.getStock(),
-        finalImgSrc
-    );
-
-    return productConverter.toResponse(product);
   }
 
   // 상품 삭제
@@ -180,6 +210,14 @@ public class ProductService {
     }
     String lowercase = fileName.toLowerCase();
     return lowercase.endsWith(".jpg") || lowercase.endsWith(".png") || lowercase.endsWith(".jpeg");
+  }
+
+  // MultipartFile 유효성 검사
+  private void validateImageFile(MultipartFile file) {
+    String fileName = file.getOriginalFilename();
+    if (!isValidImageExtension(fileName)) {
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
+    }
   }
 
   // 헬퍼 메서드

@@ -6,24 +6,27 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.entity.enums.ProductStatus;
+import com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,8 +56,21 @@ public class AdminProductControllerTest {
         .category(FOOD)
         .stock(100)
         .description("신선하고 맛있는 딸기!")
-        .imgSrc(null)
         .build();
+
+    MockMultipartFile requestPart = new MockMultipartFile(
+        "request",
+        "request",
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(request)
+    );
+
+    MockMultipartFile imagePart = new MockMultipartFile(
+        "image",
+        "strawberry.png",
+        MediaType.IMAGE_PNG_VALUE,
+        "test image content".getBytes()
+    );
 
     ProductResponse response = ProductResponse.builder()
         .id(1L)
@@ -64,15 +80,16 @@ public class AdminProductControllerTest {
         .stock(100)
         .status("FOR_SALE")
         .description("신선하고 맛있는 딸기!")
-        .imgSrc("none.png")
+        .imgSrc("https://s3.com/strawberry.png")
         .build();
 
-    given(productService.register(any(ProductCreateRequest.class))).willReturn(response);
+    given(productService.register(any(), any())).willReturn(response);
 
     // when & then
-    mockMvc.perform(post("/api/admin/products")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(multipart("/api/admin/products")
+            .file(requestPart)
+            .file(imagePart)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.body.name").value("딸기"))
         .andExpect(jsonPath("$.body.price").value("15000"))
@@ -80,7 +97,7 @@ public class AdminProductControllerTest {
         .andExpect(jsonPath("$.body.stock").value("100"))
         .andExpect(jsonPath("$.body.status").value("FOR_SALE"))
         .andExpect(jsonPath("$.body.description").value("신선하고 맛있는 딸기!"))
-        .andExpect(jsonPath("$.body.imgSrc").value("none.png"));
+        .andExpect(jsonPath("$.body.imgSrc").value("https://s3.com/strawberry.png"));
   }
 
   // 상품 수정 테스트
@@ -96,8 +113,21 @@ public class AdminProductControllerTest {
         .stock(50)
         .status(ProductStatus.FOR_SALE)
         .description("수정된 딸기 상품 설명")
-        .imgSrc(null)
         .build();
+
+    MockMultipartFile requestPart = new MockMultipartFile(
+        "request",
+        "",
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(request)
+    );
+
+    MockMultipartFile imagePart = new MockMultipartFile(
+        "image",
+        "updated_strawberry.png",
+        MediaType.IMAGE_PNG_VALUE,
+        "new image content".getBytes()
+    );
 
     ProductResponse response = ProductResponse.builder()
         .id(productId)
@@ -107,16 +137,18 @@ public class AdminProductControllerTest {
         .stock(50)
         .status("FOR_SALE")
         .description("수정된 딸기 상품 설명")
-        .imgSrc("none.png")
+        .imgSrc("https://s3.com/updated_strawberry.png")
         .build();
 
-    given(productService.updateProduct(eq(productId), any(ProductUpdateRequest.class))).willReturn(
+    given(productService.updateProduct(eq(productId), any(ProductUpdateRequest.class),
+        any())).willReturn(
         response);
 
     // when & then
-    mockMvc.perform(put("/api/admin/products/{id}", productId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(multipart(HttpMethod.PUT, "/api/admin/products/{id}", productId)
+            .file(requestPart)
+            .file(imagePart)
+            .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.body.name").value("수정된 딸기"))
         .andExpect(jsonPath("$.body.price").value("18000"))
@@ -124,7 +156,7 @@ public class AdminProductControllerTest {
         .andExpect(jsonPath("$.body.stock").value("50"))
         .andExpect(jsonPath("$.body.status").value("FOR_SALE"))
         .andExpect(jsonPath("$.body.description").value("수정된 딸기 상품 설명"))
-        .andExpect(jsonPath("$.body.imgSrc").value("none.png"));
+        .andExpect(jsonPath("$.body.imgSrc").value("https://s3.com/updated_strawberry.png"));
   }
 
   // 상품 삭제 테스트
@@ -151,10 +183,16 @@ public class AdminProductControllerTest {
         .price(2000)
         .build();
 
+    MockMultipartFile requestPart = new MockMultipartFile(
+        "request",
+        "",
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(request)
+    );
+
     // when & then
-    mockMvc.perform(post("/api/admin/products")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(multipart("/api/admin/products")
+            .file(requestPart))
         .andExpect(status().isBadRequest());
   }
 
@@ -170,11 +208,44 @@ public class AdminProductControllerTest {
         .stock(999_999_999)
         .build();
 
+    MockMultipartFile requestPart = new MockMultipartFile(
+        "request",
+        "",
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(request)
+    );
+
     // when & then
-    mockMvc.perform(post("/api/admin/products")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(multipart("/api/admin/products")
+            .file(requestPart))
         .andExpect(status().isBadRequest());
+  }
+
+  // 등록 실패 - 지원하지 않는 확장자 (400 Bad Request)
+  @Test
+  @DisplayName("Post /api/admin/products - 지원하지 않는 확장자 업로드 시 400 반환")
+  void createProduct_invalidExtension_400() throws Exception {
+    ProductCreateRequest request = ProductCreateRequest.builder()
+        .name("딸기")
+        .price(1000)
+        .category(FOOD)
+        .stock(10)
+        .build();
+
+    MockMultipartFile requestPart = new MockMultipartFile("request", "", "application/json",
+        "content".getBytes());
+    MockMultipartFile exeFile = new MockMultipartFile("image", "wrong.exe",
+        "application/octet-stream", "content".getBytes());
+
+    given(productService.register(any(), any())).willThrow(
+        new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE));
+
+    // when & then
+    mockMvc.perform(multipart("/api/admin/products")
+            .file(requestPart)
+            .file(exeFile))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.result.code").value(400));
   }
 
   // 수정 실패 - 수정 시 가격을 음수로 변경 시도
@@ -190,10 +261,16 @@ public class AdminProductControllerTest {
         .status(ProductStatus.FOR_SALE)
         .build();
 
+    MockMultipartFile requestPart = new MockMultipartFile(
+        "request",
+        "",
+        MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsBytes(request)
+    );
+
     // when & then
-    mockMvc.perform(put("/api/admin/products/{id}", productId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+    mockMvc.perform(multipart(HttpMethod.PUT, "/api/admin/products/{id}", productId)
+            .file(requestPart))
         .andExpect(status().isBadRequest());
   }
 

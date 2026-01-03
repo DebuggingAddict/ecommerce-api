@@ -28,6 +28,10 @@ spring:
       mode: always        # 🚀 data.sql 실행 활성화
       encoding: UTF-8
       continue-on-error: false  # ✅ 에러 발생 시 즉시 중단 (디버깅용)
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 logging:
   level:

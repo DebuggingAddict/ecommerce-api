@@ -62,8 +62,6 @@ class OrderServiceTest {
   private User createUser() {
     return User.builder()
         .id(1L)
-        .username("testuser")
-        .password("password123")
         .name("테스트유저")
         .email("test@example.com")
         .phone("010-1234-5678")

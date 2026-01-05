@@ -12,13 +12,13 @@ import com.shoppingmall.ecommerceapi.domain.cart.entity.CartItem;
 import com.shoppingmall.ecommerceapi.domain.cart.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +32,7 @@ public class CartController {
 
   // 장바구니 조회 (GET /api/v1/cart)
   @GetMapping
-  public Api<CartResponse> getCart(@RequestHeader("X-USER-ID") Long userId) {
+  public Api<CartResponse> getCart(@AuthenticationPrincipal Long userId) {
     CartResponse response = cartService.getCartResponse(userId);
     return Api.OK(response);
   }
@@ -40,7 +40,7 @@ public class CartController {
   // 장바구니 담기 (POST /api/v1/cart/items)
   @PostMapping("/items")
   public Api<CartItemAddResponse> addItem(
-      @RequestHeader("X-USER-ID") Long userId,
+      @AuthenticationPrincipal Long userId,
       @Valid @RequestBody AddCartItemRequest request
   ) {
     // 서비스에서 Cart와 CartItem을 리턴하게 설계했다고 가정
@@ -54,7 +54,7 @@ public class CartController {
   // 수량 변경 (PATCH /api/v1/cart/items/{id})
   @PatchMapping("/items/{id}")
   public Api<CartItemQuantityUpdateResponse> changeQuantity(
-      @RequestHeader("X-USER-ID") Long userId,
+      @AuthenticationPrincipal Long userId,
       @PathVariable Long id,   // cartItemId
       @Valid @RequestBody ChangeCartItemQuantityRequest request
   ) {
@@ -68,7 +68,7 @@ public class CartController {
   // 특정 상품 삭제 (DELETE /api/v1/cart/items/{productId})
   @DeleteMapping("/items/{productId}")
   public Api<Void> removeItem(
-      @RequestHeader("X-USER-ID") Long userId,
+      @AuthenticationPrincipal Long userId,
       @PathVariable Long productId
   ) {
     cartService.removeItem(userId, productId);
@@ -77,7 +77,7 @@ public class CartController {
 
   // 장바구니 비우기 (DELETE /api/v1/cart/items)
   @DeleteMapping("/items")
-  public Api<Void> clearCart(@RequestHeader("X-USER-ID") Long userId) {
+  public Api<Void> clearCart(@AuthenticationPrincipal Long userId) {
     cartService.clearCart(userId);
     return Api.OK(null);
   }

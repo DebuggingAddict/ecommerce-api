@@ -58,8 +58,6 @@ class OrderRepositoryTest {
     orderRepository.deleteAll();
 
     savedUser = userRepository.save(User.builder()
-        .username("testuser")
-        .password("password123")
         .name("테스트유저")
         .email("test@example.com")
         .phone("010-1234-5678")

@@ -9,12 +9,12 @@ import com.shoppingmall.ecommerceapi.domain.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +30,7 @@ public class OrderController {
    */
   @PostMapping
   public Api<OrderResponse> createOrder(
-      @RequestHeader("X-User-Id") Long userId,
+      @AuthenticationPrincipal Long userId,
       @Valid @RequestBody CreateOrderRequest request) {
     OrderResponse response = orderService.createOrder(userId, request);
     return Api.CREATED(response);
@@ -41,7 +41,7 @@ public class OrderController {
    */
   @GetMapping
   public Api<PageResponse<OrderResponse>> getMyOrders(
-      @RequestHeader("X-User-Id") Long userId,
+      @AuthenticationPrincipal Long userId,
       PageRequestDTO pageRequestDTO) {
 
     Page<OrderResponse> orderPage = orderService.getMyOrders(
@@ -64,7 +64,7 @@ public class OrderController {
    */
   @GetMapping("/{id}")
   public Api<OrderResponse> getOrder(
-      @RequestHeader("X-User-Id") Long userId,
+      @AuthenticationPrincipal Long userId,
       @PathVariable Long id) {
     OrderResponse order = orderService.getOrder(id, userId);
     return Api.OK(order);
@@ -75,7 +75,7 @@ public class OrderController {
    */
   @PostMapping("/{id}/cancel")
   public Api<String> cancelOrder(
-      @RequestHeader("X-User-Id") Long userId,
+      @AuthenticationPrincipal Long userId,
       @PathVariable Long id) {
     orderService.cancelOrder(id, userId);
     return Api.OK("주문이 취소되었습니다");
@@ -86,7 +86,7 @@ public class OrderController {
    */
   @DeleteMapping("/{id}")
   public Api<String> deleteOrder(
-      @RequestHeader("X-User-Id") Long userId,
+      @AuthenticationPrincipal Long userId,
       @PathVariable Long id) {
     orderService.deleteOrder(id, userId);
     return Api.OK("주문이 삭제되었습니다");

@@ -27,8 +27,10 @@ jobs:
           # GitHub Secrets에 저장된 변수들을 SSH 세션으로 가져옵니다.
           envs: CLOUD_AWS_ACCESS_KEY,CLOUD_AWS_SECRET_KEY,DB_URL,DB_USERNAME,DB_PASSWORD,TOKEN_SECRET_KEY,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
-            # 1. 기존 컨테이너 중지 (파일이 없을 수도 있으므로 || true 추가)
+            # 1. 기존 컨테이너 중지 및 정리
+            # docker-compose 파일이 있을 경우 중지하고, 혹시 모를 잔여 컨테이너를 강제 종료합니다.
             sudo docker-compose down || true
+            sudo docker rm -f redis_container spring_app || true
             
             # 2. 최신 이미지 받아오기
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my-app
@@ -45,22 +47,25 @@ jobs:
             echo "REDIS_HOST=redis" >> .env
             echo "REDIS_PORT=6379" >> .env
             
-            # 4. [추가] docker-compose.yml 파일 생성
-            # 사용하시는 설정에 맞춰서 내용을 작성해야 합니다. 아래는 가장 일반적인 예시입니다.
+            # 4. docker-compose.yml 파일 생성
             cat <<EOF > docker-compose.yml
             version: '3.8'
             services:
+              redis:
+                image: redis:alpine
+                container_name: redis_container
+                ports:
+                  - "6379:6379"
               my-app:
                 image: ${{ secrets.DOCKER_HUB_USERNAME }}/my-app
+                container_name: spring_app
                 ports:
                   - "8080:8080"
+                depends_on:
+                  - redis
                 env_file:
                   - .env
                 restart: always
-              redis:
-                image: redis:alpine
-                ports:
-                  - "6379:6379"
             EOF
             
             # 5. 컨테이너 실행

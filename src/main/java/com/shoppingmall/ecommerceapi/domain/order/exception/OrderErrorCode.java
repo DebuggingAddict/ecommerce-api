@@ -23,7 +23,11 @@ public enum OrderErrorCode implements ApiCode {
   ORDER_ITEM_INVALID_QUANTITY(HttpStatus.BAD_REQUEST.value(), 400, "수량은 1~99 사이여야 합니다"),
   ORDER_ITEM_INVALID_PRICE(HttpStatus.BAD_REQUEST.value(), 400, "가격은 0보다 커야 합니다"),
   ORDER_ITEM_OUT_OF_STOCK(HttpStatus.BAD_REQUEST.value(), 400, "재고가 부족합니다"),
-  ORDER_MUST_HAVE_AT_LEAST_ONE_ITEM(HttpStatus.BAD_REQUEST.value(), 400, "주문은 최소 1개 이상의 상품이 필요합니다");
+  ORDER_MUST_HAVE_AT_LEAST_ONE_ITEM(HttpStatus.BAD_REQUEST.value(), 400, "주문은 최소 1개 이상의 상품이 필요합니다"),
+
+  // 분산 락
+  ORDER_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(),500, "주문 생성에 실패했습니다. 잠시 후 다시 시도해주세요."),
+  ORDER_CANCEL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR.value(),500,"주문 취소에 실패했습니다. 잠시 후 다시 시도해주세요.");
 
   private final Integer httpStatus;
   private final Integer code;

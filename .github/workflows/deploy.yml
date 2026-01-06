@@ -2,7 +2,7 @@ name: Shopping Mall CI/CD
 
 on:
   push:
-    branches: [ "main" ] # main 브랜치에 push될 때 작동
+    branches: [ "main" ]
 
 jobs:
   deploy:
@@ -24,26 +24,27 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          # GitHub Secrets에 저장된 변수들을 SSH 세션으로 가져옵니다.
-          envs: CLOUD_AWS_ACCESS_KEY,CLOUD_AWS_SECRET_KEY,DB_URL,DB_USERNAME,DB_PASSWORD,TOKEN_SECRET_KEY,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          # script 내부에서 ${{ secrets.XXX }}를 직접 사용하므로 envs는 생략하거나 유지해도 됩니다.
           script: |
-            # 1. 기존 컨테이너 중지 및 정리
-            # docker-compose 파일이 있을 경우 중지하고, 혹시 모를 잔여 컨테이너를 강제 종료합니다.
+            # 1. 기존 컨테이너 및 포트 정리
+            sudo fuser -k 8080/tcp || true
+            sudo fuser -k 6379/tcp || true
             sudo docker-compose down || true
             sudo docker rm -f redis_container spring_app || true
             
             # 2. 최신 이미지 받아오기
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my-app
             
-            # 3. .env 파일 생성
-            echo "CLOUD_AWS_ACCESS_KEY=$CLOUD_AWS_ACCESS_KEY" > .env
-            echo "CLOUD_AWS_SECRET_KEY=$CLOUD_AWS_SECRET_KEY" >> .env
-            echo "DB_URL=$DB_URL" >> .env
-            echo "DB_USERNAME=$DB_USERNAME" >> .env
-            echo "DB_PASSWORD=$DB_PASSWORD" >> .env
-            echo "TOKEN_SECRET_KEY=$TOKEN_SECRET_KEY" >> .env
-            echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID" >> .env
-            echo "GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET" >> .env
+            # 3. .env 파일 생성 (Secrets 직접 참조 방식)
+            # 주의: ${{ }} 문법을 따옴표 안에 넣어야 값이 정확히 주입됩니다.
+            echo "CLOUD_AWS_ACCESS_KEY=${{ secrets.CLOUD_AWS_ACCESS_KEY }}" > .env
+            echo "CLOUD_AWS_SECRET_KEY=${{ secrets.CLOUD_AWS_SECRET_KEY }}" >> .env
+            echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "TOKEN_SECRET_KEY=${{ secrets.TOKEN_SECRET_KEY }}" >> .env
+            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
             echo "REDIS_HOST=redis" >> .env
             echo "REDIS_PORT=6379" >> .env
             

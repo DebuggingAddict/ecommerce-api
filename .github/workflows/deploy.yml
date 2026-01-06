@@ -25,8 +25,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           # GitHub Secrets에 저장된 변수들을 SSH 세션으로 가져옵니다.
-          envs:
-            envs: CLOUD_AWS_ACCESS_KEY,CLOUD_AWS_SECRET_KEY,DB_URL,DB_USERNAME,DB_PASSWORD,TOKEN_SECRET_KEY,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
+          envs: CLOUD_AWS_ACCESS_KEY,CLOUD_AWS_SECRET_KEY,DB_URL,DB_USERNAME,DB_PASSWORD,TOKEN_SECRET_KEY,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
             # 1. 기존 컨테이너 중지
             sudo docker-compose down

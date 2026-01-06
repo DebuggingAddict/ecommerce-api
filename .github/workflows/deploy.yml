@@ -27,13 +27,13 @@ jobs:
           # GitHub Secrets에 저장된 변수들을 SSH 세션으로 가져옵니다.
           envs: CLOUD_AWS_ACCESS_KEY,CLOUD_AWS_SECRET_KEY,DB_URL,DB_USERNAME,DB_PASSWORD,TOKEN_SECRET_KEY,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET
           script: |
-            # 1. 기존 컨테이너 중지
-            sudo docker-compose down
+            # 1. 기존 컨테이너 중지 (파일이 없을 수도 있으므로 || true 추가)
+            sudo docker-compose down || true
             
             # 2. 최신 이미지 받아오기
             sudo docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/my-app
             
-            # 3. .env 파일 생성 (도커 컴포즈가 이 파일을 읽어서 앱에 전달합니다)
+            # 3. .env 파일 생성
             echo "CLOUD_AWS_ACCESS_KEY=$CLOUD_AWS_ACCESS_KEY" > .env
             echo "CLOUD_AWS_SECRET_KEY=$CLOUD_AWS_SECRET_KEY" >> .env
             echo "DB_URL=$DB_URL" >> .env
@@ -45,5 +45,23 @@ jobs:
             echo "REDIS_HOST=redis" >> .env
             echo "REDIS_PORT=6379" >> .env
             
-            # 4. 컨테이너 실행
+            # 4. [추가] docker-compose.yml 파일 생성
+            # 사용하시는 설정에 맞춰서 내용을 작성해야 합니다. 아래는 가장 일반적인 예시입니다.
+            cat <<EOF > docker-compose.yml
+            version: '3.8'
+            services:
+              my-app:
+                image: ${{ secrets.DOCKER_HUB_USERNAME }}/my-app
+                ports:
+                  - "8080:8080"
+                env_file:
+                  - .env
+                restart: always
+              redis:
+                image: redis:alpine
+                ports:
+                  - "6379:6379"
+            EOF
+            
+            # 5. 컨테이너 실행
             sudo docker-compose up -d

@@ -27,7 +27,7 @@ public class AdminProductController {
   // 상품 등록
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> create(
-      @Valid @RequestPart("request") ProductCreateRequest request,
+      @Valid @RequestPart(value = "request") ProductCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
     ProductResponse response = productService.register(request, image);
@@ -39,7 +39,7 @@ public class AdminProductController {
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> update(
       @PathVariable Long id,
-      @Valid @RequestPart("request") ProductUpdateRequest request,
+      @Valid @RequestPart(value = "request") ProductUpdateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
     ProductResponse response = productService.updateProduct(id, request, image);

@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  # 1. 레디스 컨테이너
+  redis:
+    image: redis:alpine
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+
+  # 2. 스프링부트 앱 컨테이너
+  app:
+    build: .
+    container_name: spring_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379

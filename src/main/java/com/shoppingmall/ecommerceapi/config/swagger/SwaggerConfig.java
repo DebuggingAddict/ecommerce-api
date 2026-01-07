@@ -43,7 +43,7 @@ public class SwaggerConfig {
                             ## 쇼핑몰 백엔드 API 문서
                             
                             ### 인증 방법
-                            1. OAuth2 로그인: `http://localhost:8080/oauth2/authorization/google`
+                            1. OAuth2 로그인: `http://{baseUrl}/oauth2/authorization/google`
                             2. 리다이렉트된 URL에서 `accessToken` 파라미터 복사
                             3. 우측 상단 **Authorize** 버튼 클릭
                             4. Access Token 입력 (Bearer 제외)
@@ -57,6 +57,12 @@ public class SwaggerConfig {
                             """)
                     .version("v1.0.0"))
             .servers(List.of(
+                    new Server()
+                            .url("/")   // 현재 접속한 도메인/포트 기준
+                            .description("현재 서버"),
+                    new Server()
+                            .url("http://ec2-3-35-4-172.ap-northeast-2.compute.amazonaws.com:8080")
+                            .description("EC2 서버"),
                     new Server()
                             .url("http://localhost:8080")
                             .description("로컬 개발 서버")

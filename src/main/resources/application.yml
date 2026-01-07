@@ -14,7 +14,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
-    defer-datasource-initialization: true  # ✅ Hibernate가 테이블 만든 후 data.sql 실행
+    defer-datasource-initialization: true  # Hibernate가 테이블 만든 후 data.sql 실행
     hibernate:
       ddl-auto: create
       #ddl-auto: update # 테이블 없으면 생성, 있으면 수정
@@ -33,9 +33,9 @@ spring:
 
   sql:
     init:
-      mode: always        # 🚀 data.sql 실행 활성화
+      mode: always        # data.sql 실행 활성화
       encoding: UTF-8
-      continue-on-error: false  # ✅ 에러 발생 시 즉시 중단 (디버깅용)
+      continue-on-error: false  # 에러 발생 시 즉시 중단 (디버깅용)
 
 
   # OAuth2
@@ -57,9 +57,11 @@ spring:
 
 logging:
   level:
-    org.springframework.jdbc.datasource.init: DEBUG  # 🔍 data.sql 실행 로그
+    org.springframework.jdbc.datasource.init: DEBUG  # data.sql 실행 로그
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.amazonaws: DEBUG
+    com.shoppingmall.ecommerceapi.common.infra: DEBUG
 
 token:
   secret:

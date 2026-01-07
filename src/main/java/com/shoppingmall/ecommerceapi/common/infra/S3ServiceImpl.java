@@ -9,10 +9,12 @@ import com.shoppingmall.ecommerceapi.domain.product.exception.ProductErrorCode;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
@@ -48,6 +50,10 @@ public class S3ServiceImpl implements S3Service {
 
     } catch (IOException e) {
       System.err.println("S3 업로드 에러: " + e.getMessage());
+      throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
+    } catch (Exception e) {
+      // S3/AWS 예외 포함한 모든 예외를 로깅
+      log.error("S3 업로드 실패: bucket={}, fileName={}, error={}", bucket, fileName, e.getMessage(), e);
       throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
     }
   }

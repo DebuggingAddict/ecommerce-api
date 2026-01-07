@@ -80,7 +80,7 @@ cloud:
       secret-key: ${CLOUD_AWS_SECRET_KEY}
     s3:
       bucket: ${S3_IMAGE_BUCKET}
-      endpoint: https://s3.ap-northeast-2.amazonaws.com # 🚀 추가: 리전 엔드포인트 명시
+      endpoint: https://s3.ap-northeast-2.amazonaws.com # 추가: 리전 엔드포인트 명시
     region:
       static: ap-northeast-2
     stack:

@@ -2,7 +2,7 @@ name: Shopping Mall CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] # main 브랜치에 push될 때 작동
 
 jobs:
   deploy:

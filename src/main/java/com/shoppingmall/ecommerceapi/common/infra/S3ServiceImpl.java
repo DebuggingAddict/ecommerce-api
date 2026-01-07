@@ -36,10 +36,10 @@ public class S3ServiceImpl implements S3Service {
     try {
       ObjectMetadata metadata = new ObjectMetadata();
       metadata.setContentType(file.getContentType());
-      metadata.setContentLength(file.getSize()); // 🚀 파일 크기 명시 (권장)
+      metadata.setContentLength(file.getSize()); // 파일 크기 명시
 
       // S3에 실제 파일 업로드 (withCannedAcl 추가)
-      // .withCannedAcl(CannedAccessControlList.PublicRead) 가 핵심입니다.
+      // .withCannedAcl(CannedAccessControlList.PublicRead) 가 핵심
       amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata)
           .withCannedAcl(CannedAccessControlList.PublicRead));
 
@@ -47,7 +47,6 @@ public class S3ServiceImpl implements S3Service {
       return amazonS3.getUrl(bucket, fileName).toString();
 
     } catch (IOException e) {
-      // S3 업로드 중 에러 발생 시 로그를 남기는 것이 좋습니다.
       System.err.println("S3 업로드 에러: " + e.getMessage());
       throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
     }

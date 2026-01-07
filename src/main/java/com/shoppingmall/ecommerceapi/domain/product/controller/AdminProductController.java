@@ -52,7 +52,7 @@ public class AdminProductController {
     return Api.OK(response);
   }
 
-  // 상품 삭제 (수정 없음)
+  // 상품 삭제
   @PatchMapping("/{id}")
   public Api<Void> delete(@PathVariable Long id) {
     productService.deleteProduct(id);

@@ -5,6 +5,8 @@ import com.shoppingmall.ecommerceapi.domain.product.dto.ProductCreateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -27,11 +29,12 @@ public class AdminProductController {
   // 상품 등록
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> create(
+      @Parameter(schema = @Schema(type = "string", format = "binary"))
+      // Swagger가 JSON 파트를 올바르게 렌더링하도록 유도
       @Valid @RequestPart(value = "request") ProductCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
     ProductResponse response = productService.register(request, image);
-
     return Api.CREATED(response);
   }
 
@@ -39,6 +42,7 @@ public class AdminProductController {
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> update(
       @PathVariable Long id,
+      @Parameter(schema = @Schema(type = "string", format = "binary"))
       @Valid @RequestPart(value = "request") ProductUpdateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {

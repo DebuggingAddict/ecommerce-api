@@ -1,6 +1,7 @@
 package com.shoppingmall.ecommerceapi.common.infra;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.shoppingmall.ecommerceapi.common.exception.BusinessException;
@@ -31,16 +32,22 @@ public class S3ServiceImpl implements S3Service {
 
     // UUID 써서 S3에 저장될 고유한 파일명 만들기
     String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
     try {
       ObjectMetadata metadata = new ObjectMetadata();
-      metadata.setContentType(file.getContentType()); // 파일 타입
+      metadata.setContentType(file.getContentType());
+      metadata.setContentLength(file.getSize()); // 파일 크기 명시
 
-      // S3에 실제 파일 업로드
-      amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata));
+      // S3에 실제 파일 업로드 (withCannedAcl 추가)
+      // .withCannedAcl(CannedAccessControlList.PublicRead) 가 핵심
+      amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata)
+          .withCannedAcl(CannedAccessControlList.PublicRead));
 
-      // 업로드된 파일 전체 URL 주소 반환, 에러 발생할 경우
+      // 업로드된 파일 전체 URL 주소 반환
       return amazonS3.getUrl(bucket, fileName).toString();
+
     } catch (IOException e) {
+      System.err.println("S3 업로드 에러: " + e.getMessage());
       throw new BusinessException(ProductErrorCode.PRODUCT_INVALID_IMAGE);
     }
   }
@@ -48,16 +55,12 @@ public class S3ServiceImpl implements S3Service {
   // 파일 삭제
   @Override
   public void deleteFile(String fileUrl) {
-    // Url 없거나 기본 이미지면 즉시 종료
     if (fileUrl == null || fileUrl.equals("none.png") || fileUrl.isBlank()) {
       return;
     }
 
-    /**
-     * 전체 URL에서 실제 파일 이름(key)만 추출 - URL 마지막 / 뒤에 오는게 S3의 객체 키임
-     * S3 버킷에서 해당 키 가진 객체 삭제
-     */
     try {
+      // URL에서 마지막 '/' 뒤의 문자열(파일명/Key)만 추출
       String key = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
       amazonS3.deleteObject(bucket, key);
     } catch (Exception e) {

@@ -6,6 +6,7 @@ import com.shoppingmall.ecommerceapi.domain.product.dto.ProductResponse;
 import com.shoppingmall.ecommerceapi.domain.product.dto.ProductUpdateRequest;
 import com.shoppingmall.ecommerceapi.domain.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,9 @@ public class AdminProductController {
   // 상품 등록
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> create(
-      @Parameter(schema = @Schema(type = "string", format = "binary"))
-      // Swagger가 JSON 파트를 올바르게 렌더링하도록 유도
-      @Valid @RequestPart(value = "request") ProductCreateRequest request,
+      @RequestPart(value = "request")
+      @Parameter(schema = @Schema(implementation = ProductCreateRequest.class), content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+      @Valid ProductCreateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
     ProductResponse response = productService.register(request, image);
@@ -42,21 +43,19 @@ public class AdminProductController {
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Api<ProductResponse> update(
       @PathVariable Long id,
-      @Parameter(schema = @Schema(type = "string", format = "binary"))
-      @Valid @RequestPart(value = "request") ProductUpdateRequest request,
+      @RequestPart(value = "request")
+      @Parameter(schema = @Schema(implementation = ProductUpdateRequest.class), content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+      @Valid ProductUpdateRequest request,
       @RequestPart(value = "image", required = false) MultipartFile image
   ) {
     ProductResponse response = productService.updateProduct(id, request, image);
-
     return Api.OK(response);
   }
 
-  // 상품 삭제
+  // 상품 삭제 (수정 없음)
   @PatchMapping("/{id}")
-  public Api<Void> delete(
-      @PathVariable Long id) {
+  public Api<Void> delete(@PathVariable Long id) {
     productService.deleteProduct(id);
-
     return Api.OK(null);
   }
 }

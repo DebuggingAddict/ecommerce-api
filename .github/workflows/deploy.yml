@@ -45,6 +45,7 @@ jobs:
             echo "REDIS_PORT=6379" >> .env
             echo "OAUTH2_REDIRECT_URL=${{ secrets.OAUTH2_REDIRECT_URL }}" >> .env
             echo "OAUTH2_FAILURE_REDIRECT_URL=${{ secrets.OAUTH2_FAILURE_REDIRECT_URL }}" >> .env
+            echo "S3_IMAGE_BUCKET=${{ secrets.S3_IMAGE_BUCKET }}" >> .env
             
             # 4. docker-compose.yml 생성
             cat <<EOF > docker-compose.yml
